@@ -51,6 +51,7 @@ io.on('connection', function(socket) {
         players["no" + r] = {};
         socket.emit('POSTnoRoom', "no" + r);
     });
+
     var stats = fs.readFileSync('stats.json');
     stats = JSON.parse(stats);
     socket.emit('dataStats', stats);
@@ -181,8 +182,6 @@ io.on('connection', function(socket) {
             players[roomno][i] = players[roomno][i + 1];
         delete players[roomno][Object.keys(players[roomno]).length - 1];
 
-        socket.leave("room-" + roomno);
-
         var links = fs.readFileSync('link.json');
         links = JSON.parse(links);
         if(Object.keys(players[roomno]).length == 0) {
@@ -215,18 +214,13 @@ io.on('connection', function(socket) {
         }
         io.to("room-" + roomno).emit('players', players[roomno]);
         io.to("room-" + roomno).emit('reset');
+        if(nickname.indexOf('Bot') == -1) socket.leave("room-" + roomno);
     }
 
     //Отключение пользователя из комнаты
     socket.on('exitGame', (roomno, nickname) => {
         exit(roomno, nickname);
     });
-
-    /* socket.on("disConnect", (roomno, nickname)=>{
-        if(players[roomno] != undefined)
-            if(Object.keys(players[roomno]).length != 0)
-                exit(roomno, nickname);
-    }); */
 
     socket.on('disconnect', () => {
         if (socket.username != undefined){
