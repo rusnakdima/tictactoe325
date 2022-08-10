@@ -360,7 +360,7 @@ socket.on("connectGame", ()=>{
     $("#game1").show();
     $("footer").hide();
     $(".opengame").hide();
-    createMaps(player);   
+    createMaps();   
     //Запуск функции игры с реальными игроками
     PvP();
 });
@@ -381,8 +381,8 @@ function exitgame(){
     }
     $("#game1").hide();
     $("#tablegame1").empty();
-    // $("#outChat").empty();
-    // $("#chat").css({"display":"none"});
+    $("#outChat").empty();
+    $("#chat").css({"display":"none"});
     $("#game1 #input").css({"color": "white", "display":"none"}).html("");
     $("#game1 #closetic").hide();
     $(".Wait").hide();
@@ -915,7 +915,7 @@ $("#buttonChat").click(()=>{
 //Кнопка создания бота
 $("#addBot").click(function(){
     if(Object.keys(Players).length < player){
-        socket.emit('nickname', Math.floor(Math.random() * 90 + 10)+'Bot', noRoom);
+        socket.emit('connectGame', Math.floor(Math.random() * 90 + 10)+'Bot', noRoom);
         socket.emit('getPlayers', noRoom);
     }
 });
@@ -964,13 +964,12 @@ function PvP(){
     }
 
     nickname = Math.floor(Math.random() * 90 + 10) + document.cookie.match(/nickname=(.+?)(;|$)/)[1];
-    sessionStorage['nickname'] = nickname;
 
     //Отправление никнейма на сервер
-    socket.emit('nickname', nickname, noRoom);
+    socket.emit('connectGame', nickname, noRoom);
 
     //Проверка на игру с ботом
-    if(botYes) socket.emit('nickname', '00Bot', noRoom);
+    if(botYes) socket.emit('connectGame', '00Bot', noRoom);
 
     //Событие по клику на клетку
 	$(".tic").click(function(){
@@ -1126,7 +1125,6 @@ function creategame(){
         //Получение сообщения от сервера с номером комнаты
         socket.on('POSTnoRoom', (roomno) => {
             noRoom = roomno;
-            sessionStorage['noRoom'] = noRoom;
         });
         setTimeout(() => {
             //Следующие три строки показывают/скрывают элементы интерфейса

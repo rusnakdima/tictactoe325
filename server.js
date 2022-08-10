@@ -21,7 +21,7 @@ server.listen(process.env.PORT || 3000, function(){
     console.log('http://localhost:3000');
 });
 
-var p;
+var p = -1;
 var r = 0;
 var players = {};
 
@@ -48,8 +48,6 @@ io.on('connection', function(socket) {
     });
     socket.on("createRoom", () => {
         r++;
-        p = -1;
-        socket.join("room-no" + r);
         players["no" + r] = {};
         socket.emit('POSTnoRoom', "no" + r);
     });
@@ -100,26 +98,42 @@ io.on('connection', function(socket) {
             }
         }
     });
-    
-    //Добавление пользователя в комнату и инкрементирование числа пользователей в комнате
-    socket.on("nickname", (nickname, roomno) => {
-        p = Object.keys(players[roomno]).length;
-        players[roomno][p] = nickname;
-        if(nickname.indexOf('Bot') == -1) socket.username = nickname;
+
+    //Работа над ссылками в файле
+    function workOnLinks(roomno){
         var links = fs.readFileSync('link.json');
         links = JSON.parse(links);
-        if(links[roomno]["nickname"] != null)
-            links[roomno]["nickname"] += ", " + nickname.slice(2);
-        else links[roomno]["nickname"] = nickname.slice(2);
-        var link = {
+        links[roomno]["nickname"] = "";
+        for(var i = 0; i < Object.values(players[roomno]).length; i++){
+            var nick = Object.values(players[roomno])[i];
+            if(links[roomno]["nickname"] != "")
+                links[roomno]["nickname"] += ", " + nick.slice(2);
+			else links[roomno]["nickname"] = nick.slice(2);
+		}
+		var link = {
             nickname: links[roomno]["nickname"],
             field: links[roomno]["field"],
             num_player: Object.keys(players[roomno]).length,
             player: links[roomno]["player"]
         }
         links[roomno] = link;
+        if(links[roomno]["num_player"] == 0){
+            var obj = links;
+            delete obj[roomno];
+        }
         var data = JSON.stringify(links);
         fs.writeFileSync('link.json', data);
+    }
+    
+    //Добавление пользователя в комнату и инкрементирование числа пользователей в комнате
+    socket.on("connectGame", (nickname, roomno) => {
+        p = Object.keys(players[roomno]).length;
+        players[roomno][p] = nickname;
+        if(nickname.indexOf('Bot') == -1) {
+            socket.username = nickname;
+            socket.join("room-" + roomno);
+        }
+        workOnLinks(roomno);
         io.sockets.emit("clearLinks");
     });
 
@@ -143,8 +157,6 @@ io.on('connection', function(socket) {
         if(Object.keys(players[noRoom]).length < player){
             socket.join("room-" + noRoom);
             socket.emit("connectGame");
-            var links = fs.readFileSync('link.json');
-            links = JSON.parse(links);
         }
     });
 
@@ -163,42 +175,24 @@ io.on('connection', function(socket) {
         io.to("room-" + roomno).emit('reset');
     });
 
-	function deletePlayer(links, roomno){
-		links[roomno]["nickname"] = "";
-        for(var i = 0; i < Object.values(players[roomno]).length; i++){
-            var nick = Object.values(players[roomno])[i];
-            if(links[roomno]["nickname"] != "")
-                links[roomno]["nickname"] += ", " + nick.slice(2);
-			else links[roomno]["nickname"] = nick.slice(2);
-		}
-		var link = {
-            nickname: links[roomno]["nickname"],
-            field: links[roomno]["field"],
-            num_player: Object.keys(players[roomno]).length,
-            player: links[roomno]["player"]
-        }
-        links[roomno] = link;
-        var data = JSON.stringify(links);
-        fs.writeFileSync('link.json', data);
-        if(links[roomno]["num_player"] == 0){
+    function exit(roomno, nickname){
+        var numNick = Object.values(players[roomno]).indexOf(nickname);
+        for (var i = numNick; i < Object.keys(players[roomno]).length; i++)
+            players[roomno][i] = players[roomno][i + 1];
+        delete players[roomno][Object.keys(players[roomno]).length - 1];
+
+        socket.leave("room-" + roomno);
+
+        var links = fs.readFileSync('link.json');
+        links = JSON.parse(links);
+        if(Object.keys(players[roomno]).length == 0) {
+            delete players[roomno];
             var obj = links;
             delete obj[roomno];
             var data = JSON.stringify(obj);
             fs.writeFileSync('link.json', data);
-        }
-	}
-
-    function exit(roomno, nickname){
-        var numNick = Object.values(players[roomno]).indexOf(nickname);
-        var lengthPlayer = Object.keys(players[roomno]).length;
-        for (var i = numNick; i < lengthPlayer; i++)
-            players[roomno][i] = players[roomno][i + 1];
-        delete players[roomno][lengthPlayer - 1];
-
-        var links = fs.readFileSync('link.json');
-        links = JSON.parse(links);
-        deletePlayer(links, roomno);
-        if(links[roomno] != undefined){
+        } else {
+            workOnLinks(roomno);
             var numPl = 0;
             for(var i = 0; i < Object.keys(players[roomno]).length; i++){
                 if(players[roomno][i].indexOf('Bot') == -1) numPl++;
