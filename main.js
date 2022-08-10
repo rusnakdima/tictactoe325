@@ -368,6 +368,8 @@ socket.on("connectGame", ()=>{
 //Функция выхода из игры с реальными игроками
 function exitgame(){
     botYes = false;
+    k = 0;
+    gameOn = false;
     socket.emit("exitGame", noRoom, nickname);
     socket.emit('getPlayers', noRoom);
     socket.emit('clickReset', noRoom);
@@ -933,9 +935,10 @@ function PvP(){
     var widthCell = 0;
     widthCell = $("td#0_0").width() * (+field + 1);
     //Скрытие кнопки сброса
-	$("#reset").css({"width": widthCell}).hide().attr("class", "relative left-0 bg-gray-800 border-2 border-white text-white text-center py-4");
-    $("#game1 .field").css({"width": widthCell});
+    $("#reset").css({"width": widthCell}).hide().attr("class", "relative left-0 bg-gray-800 border-2 border-white text-white text-center py-4");
+    $("#game1 .field").css({"width": widthCell+80});
     $(".Wait").css({"width": $("#tablegame1").width(), "height": $("#tablegame1").height() - 20});
+    
     setInterval(()=>{
         if($("td#0_0").length){
             var leftTD = $("td#0_0").offset().left;
@@ -986,7 +989,7 @@ function PvP(){
             var spotTaken = $("#" + slot).text();
             //Проверка что клетка не занята
             if (spotTaken === " "){
-            	k++;
+                k++;
                 var whatCol = colFishki[idPlayer];
                 $("#" + slot).text(fishki[idPlayer]).css({"color": whatCol});
                 proverka(whatGame, fishki[idPlayer], field);
@@ -994,7 +997,7 @@ function PvP(){
                     var a = turnPlayer.shift();
                     turnPlayer.push(a);
                 }
-				turnPL(turnPlayer, whatGame);
+                turnPL(turnPlayer, whatGame);
             }
         }
 	});
@@ -1142,13 +1145,3 @@ function creategame(){
     }
     return 0;
 }
-
-/* window.onload = function () {
-    if (sessionStorage['loaded']) {
-        socket.emit('disConnect', sessionStorage['noRoom'], sessionStorage['nickname']);
-        sessionStorage.removeItem('noRoom');
-        sessionStorage.removeItem('nickname');
-    } else {
-        sessionStorage['loaded'] = true;
-    }
-} */
