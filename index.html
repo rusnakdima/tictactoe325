@@ -1,0 +1,227 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1, user-scalable=yes">
+		<title>Tic-tac-toe online</title>
+		<link rel="shortcut icon" href="icon.png">
+		<script src="jquery-3.6.0.min.js"></script>
+		<link rel="stylesheet" href="main.css">
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-VTZWL7TQ2B"></script>
+		<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+		<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){window.dataLayer.push(arguments);}
+			gtag('js', new Date());
+			gtag('config', 'G-VTZWL7TQ2B');
+		</script>
+	</head>
+	<body align="justify" class="top-0 left-0 m-0 w-full bg-slate-900 text-white text-xl">
+		<div id="main">
+			<div class="profile left-0 top-0 m-0 mt-9">
+				<header class="border-2 border-transparent border-b-yellow-300 fixed left-0 top-0 m-0 text-center text-white w-full">
+					<span style="font-size: 18pt;" data-rVal="Профиль" data-eVal="Profile"></span>
+				</header>
+				<div style="text-align: center;">
+					<ion-icon style="width: 5em; height: 5em;" name="person-outline"></ion-icon><br>
+					<span><output id="nickname"></output> <a href="#" class="text-yellow-300" onclick="$('#back').show(); $('#Login').show();" style="font-size: 10pt;" data-rVal="Изменить" data-eVal="Edit"></a></span><br>
+					<span>
+						<span data-rVal="Количество побед: " data-eVal="Winnings: "></span><output id="winnings"></output><br>
+						<span data-rVal="Количество ничьих: " data-eVal="Draw: "></span><output id="draws"></output><br>
+						<span data-rVal="Количество проигрышей: " data-eVal="Losses: "></span><output id="losses"></output>
+					</span>
+				</div>
+			</div>
+			<div id="back" class="bg-white/30 w-full h-full z-50 left-0 top-0 absolute">
+				<div id="Login" class="border-2 border-yellow-300 w-max my-2.5 mx-auto p-2.5 z-50 bg-slate-900" style="top: 50px;">
+					<span data-rVal="Введите логин" data-eVal="Enter your username"></span><br>
+					<input style="background-color: #0000; color: white; border: 2px solid yellow;" id="newProfile"><br>
+					<div id="result"></div><br>
+					<div style="width: max-content; height: 40px;">
+						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" id="login" data-rVal="Войти" data-eVal="Login"></button>
+						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" onclick='$("#back").hide(); $("#back #result").css({"display": "none"});' data-rVal="Отмена" data-eVal="Cancel"></button>
+					</div>
+				</div>
+				<div id="ReqPass" class="border-2 border-yellow-300 w-max my-2.5 mx-auto p-2.5 z-50 bg-slate-900" style="top: 50px;">
+					<span data-rVal="Введите пароль" data-eVal="Enter the password"></span><br>
+					<input type="password" style="background-color: #0000; color: white; border: 2px solid yellow;" id="reqPass"><br>
+					<div id="result1"></div><br>
+					<div style="width: max-content; height: 40px;">
+						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" id="sentPass" data-rVal="Войти" data-eVal="Login"></button>
+						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" onclick='$("#ReqPass").hide(); $("#Login").show(); $("#back #result").css({"display": "none"});' data-rVal="Назад" data-eVal="Back"></button>
+					</div>
+				</div>
+				<div id="SetPass" class="border-2 border-yellow-300 w-max my-2.5 mx-auto p-2.5 z-50 bg-slate-900" style="top: 50px;">
+					<span data-rVal="Установите пароль" data-eVal="Set a password"></span><br>
+					<input type="password" style="background-color: #0000; color: white; border: 2px solid yellow;" id="setPass"><br>
+					<div style="width: max-content; height: 40px;">
+						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" id="sentPass1" data-rVal="Зарегистрироваться" data-eVal="Register"></button>
+						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" onclick='$("#SetPass").hide(); $("#Login").show(); $("#back #result").css({"display": "none"});' data-rVal="Назад" data-eVal="Back"></button>
+					</div>
+				</div>
+			</div>
+			<div class="opengame left-0 top-0 mb-0 mx-4 mt-10">
+				<header class="border-2 border-transparent border-b-yellow-300 fixed left-0 top-0 m-0 text-center text-white w-full bg-slate-900">
+					<span style="font-size: 18pt;" data-rVal="Открытые игры" data-eVal="Open games"></span>
+				</header>
+				<div id="hyperlink"></div>
+			</div>
+			<div class="creategame left-0 top-0 mb-0 mx-4 mt-12">
+				<header class="border-2 border-transparent border-b-yellow-300 fixed left-0 top-0 m-0 text-center text-white w-full bg-slate-900">
+					<span style="font-size: 18pt;" data-rVal="Создать игру" data-eVal="Create a game"></span>
+				</header>
+				<p data-rVal="Размер поля" data-eVal="Field size"></p>
+				<span class="choose">
+					<input type="radio" name="field" id="field03">
+					<label for="field03">3x3</label>
+				</span>
+				<span class="choose">
+					<input type="radio" name="field" id="field04">
+					<label for="field04">4x4</label>
+				</span><br>
+				<span class="choose">
+					<input type="radio" name="field" id="field05">
+					<label for="field05">5x5</label>
+				</span>
+				<span class="choose">
+					<input type="radio" name="field" id="field06">
+					<label for="field06">6x6</label>
+				</span><br>
+				<span class="choose">
+					<input type="radio" name="field" id="field07">
+					<label for="field07">7x7</label>
+				</span>
+				<span class="choose">
+					<input type="radio" name="field" id="field08">
+					<label for="field08">8x8</label>
+				</span><br>
+				<span class="choose">
+					<input type="radio" name="field" id="field09">
+					<label for="field09">9x9</label>
+				</span>
+				<span class="choose">
+					<input type="radio" name="field" id="field10">
+					<label for="field10">10x10</label>
+				</span>
+				<hr>
+				<p data-rVal="Режим игры" data-eVal="Game mode"></p>
+				<span class="choose">
+					<input type="radio" name="player" id="player1">
+					<label for="player1">Player vs Bot</label>
+				</span><br>
+				<span class="choose">
+					<input type="radio" name="player" id="player2">
+					<label for="player2">2 Players</label>
+				</span><br>
+				<span class="choose">
+					<input type="radio" name="player" id="player3">
+					<label for="player3">3 Players</label>
+				</span><br>
+				<span class="choose">
+					<input type="radio" name="player" id="player4">
+					<label for="player4">4 Players</label>
+				</span><br>
+				<span class="choose">
+					<input type="radio" name="player" id="player5">
+					<label for="player5">5 Players</label>
+				</span><br>
+				<span class="choose">
+					<input type="radio" name="player" id="player6">
+					<label for="player6">6 Players</label>
+				</span><br>
+				<span class="choose">
+					<input type="radio" name="player" id="player7">
+					<label for="player7">7 Players</label>
+				</span><br>
+				<span class="choose">
+					<input type="radio" name="player" id="player8">
+					<label for="player8">8 Players</label>
+				</span>
+				<hr>
+				<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xl px-5 py-2.5 mr-2 mb-2" id="Create" onclick="creategame();" data-rVal="Создать" data-eVal="Create"></button>
+			</div>
+			<div class="statistics left-0 top-0 mb-0 mx-4 mt-10">
+				<header class="border-2 border-transparent border-b-yellow-300 fixed left-0 top-0 m-0 text-center text-white w-full bg-slate-900">
+					<span style="font-size: 18pt;" data-rVal="Статистика" data-eVal="Statistics"></span>
+				</header>
+				<div id="outStats" class="w-full"></div>
+			</div>
+			<footer class="border-2 border-transparent border-t-yellow-300 w-full left-0 bottom-0 fixed m-0 text-center text-white bg-slate-900">
+				<table cellspacing="0" class="text-center w-full">
+					<tr>
+						<td id="profile" class="w-1/4"><ion-icon name="person-outline"></ion-icon><br><span data-rVal="Профиль" data-eVal="Profile"></span></td>
+						<td id="opengame" class="w-1/4"><ion-icon name="search-outline"></ion-icon><br><span data-rVal="Открытые" data-eVal="Open"></span></td>
+						<td id="creategame" class="w-1/4"><ion-icon name="add-outline"></ion-icon><br><span data-rVal="Создать игру" data-eVal="Create a game"></span></td>
+						<td id="statistics" class="w-1/4"><ion-icon name="stats-chart-outline"></ion-icon><br><span data-rVal="Статистика" data-eVal="Statistics"></span></td>
+					</tr>
+				</table>
+			</footer>
+		</div>
+		<div id="game1">
+			<div class="field m-2.5 p-2.5 rounded-lg relative">
+				<div class="playerBlock">
+					<div>
+						<div class="player" id="playerTwo"><ion-icon style="width: 1.1em; height: 1em;" name="person-outline"></ion-icon></div><br>
+						<span class="nickBlock" id="nickTwo">NaN</span>
+					</div> 
+					<div>
+						<div class="player" id="playerThree"><ion-icon style="width: 1.1em; height: 1em;" name="person-outline"></ion-icon></div><br>
+						<span class="nickBlock" id="nickThree">NaN</span>
+					</div> 
+					<div>
+						<div class="player" id="playerFour"><ion-icon style="width: 1.1em; height: 1em;" name="person-outline"></ion-icon></div><br>
+						<span class="nickBlock" id="nickFour">NaN</span>
+					</div> 
+					<div>
+						<div class="player" id="playerFive"><ion-icon style="width: 1.1em; height: 1em;" name="person-outline"></ion-icon></div><br>
+						<span class="nickBlock" id="nickFive">NaN</span>
+					</div> 
+					<div>
+						<div class="player" id="playerSix"><ion-icon style="width: 1.1em; height: 1em;" name="person-outline"></ion-icon></div><br>
+						<span class="nickBlock" id="nickSix">NaN</span>
+					</div> 
+					<div>
+						<div class="player" id="playerSeven"><ion-icon style="width: 1.1em; height: 1em;" name="person-outline"></ion-icon></div><br>
+						<span class="nickBlock" id="nickSeven">NaN</span>
+					</div> 
+					<div>
+						<div class="player" id="playerEight"><ion-icon style="width: 1.1em; height: 1em;" name="person-outline"></ion-icon></div><br>
+						<span class="nickBlock" id="nickEight">NaN</span>
+					</div> 
+				</div>
+				<div id="input" class="text-white text-center mx-auto text-2xl"></div>
+				<table align="center" id="tablegame1"></table>
+				<div class="playerBlock">
+					<div>
+						<div class="player" id="playerOne"><ion-icon style="width: 1em; height: 1em;" name="person-outline"></ion-icon></div><br>
+						<span class="nickBlock" id="nickOne">NaN</span>
+					</div>
+				</div>
+			</div>
+			<div class="absolute bg-black/0" id="closetic"></div>
+			<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xl px-5 py-2.5 mr-2 mb-2" onclick="exitgame();" data-rVal="Выход" data-eVal="Exit"></button><br>
+			<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xl px-5 py-2.5 mr-2 mb-2" id="addBot" data-rVal="Добавить бота" data-eVal="Add a bot"></button><br>
+			<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xl px-5 py-2.5 mr-2 mb-2" id="delBot" data-rVal="Удалить бота" data-eVal="Delete bot"></button>
+			<div id="buttonChat" onclick="$('#chat').toggle();">
+				<ion-icon name="chatbubble-ellipses-outline" style="width: 3em; height: 3em;"></ion-icon>
+				<div id="numMess"></div>
+			</div>
+			<div id="chat" class="rounded-xl absolute bg-white">
+				<div id="headChat" class="text-black text-center h-12 border-2 border-b-black rounded-tl-xl rounded-tr-xl"><b>Чат</b></div>
+				<div id="outChat" class="text-black w-full h-80 overflow-y-scroll"></div>
+				<div id="inChat" class="absolute w-full">
+					<input id="inputText" placeholder="Enter text" />
+					<ion-icon id="sendMes" name="send" style="width: 1.3em; height: 1.3em; right: 4px; bottom: 0px; position: absolute; color: black;"></ion-icon>
+				</div>
+			</div>
+		</div>
+		<div class="Wait text-center justify-center top-0 left-0 m-0 absolute text-white bg-black/50">
+			<img src="wait.png" width="50px" height="50px" class="mx-auto my-0" /><br>
+			<span data-rVal="Ожидание игроков" data-eVal="Waiting for players"></span>
+			<div id="waitPlayer"></div>
+		</div>
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="main.js"></script>
+	</body>
+</html>
