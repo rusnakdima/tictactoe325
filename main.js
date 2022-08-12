@@ -370,6 +370,7 @@ function exitgame(){
     botYes = false;
     k = 0;
     gameOn = false;
+    turnPlayer = [];
     socket.emit("exitGame", noRoom, nickname);
     socket.emit('getPlayers', noRoom);
     socket.emit('clickReset', noRoom);
@@ -533,33 +534,41 @@ function Draw(field, whatGame){
 //Функция проверки на победу 
 function proverka(whatGame, currentMove, field) {
     for(var i = 0; i < field; i++){
-        for(var j = 0 ; j < field; j++){
+        for(var j = 0; j < field; j++){
             if($("#"+whatGame+" #"+ i +"_"+ j).text() == currentMove){
                 //Проверка наличия фигурок с ходом вправо
                 var jR = j;
                 if($("#"+whatGame+" #"+ i +"_"+ (++jR)).text() == currentMove && $("#"+whatGame+" #"+ i +"_"+ (++jR)).text() == currentMove){
-                    if(field>3){
+                    if(field == 15){
+                        if($("#"+whatGame+" #"+ i +"_"+ (++jR)).text() == currentMove && $("#"+whatGame+" #"+ i +"_"+ (++jR)).text() == currentMove && $("#"+whatGame+" #"+ i +"_"+ (++jR)).text() == currentMove) win(currentMove, field, whatGame, i, j, i, jR);
+                    } else if(field>3){
                         if($("#"+whatGame+" #"+ i +"_"+ (++jR)).text() == currentMove) win(currentMove, field, whatGame, i, j, i, jR);
                     } else win(currentMove, field, whatGame, i, j, i, jR);
                 }
                 //Проверка наличия фигурок с ходом вниз
                 var iB = i;
                 if($("#"+whatGame+" #"+ (++iB) +"_"+ j).text() == currentMove && $("#"+whatGame+" #"+ (++iB) +"_"+ j).text() == currentMove){
-                    if(field>3){
+                    if(field == 15){
+                        if($("#"+whatGame+" #"+ (++iB) +"_"+ j).text() == currentMove && $("#"+whatGame+" #"+ (++iB) +"_"+ j).text() == currentMove && $("#"+whatGame+" #"+ (++iB) +"_"+ j).text() == currentMove) win(currentMove, field, whatGame, i, j, iB, j);
+                    } else if(field>3){
                         if($("#"+whatGame+" #"+ (++iB) +"_"+ j).text() == currentMove) win(currentMove, field, whatGame, i, j, iB, j);
                     } else win(currentMove, field, whatGame, i, j, iB, j);
                 }
                 //Проверка наличия фигурок с ходом в правый нижний угол
                 var iB = i, jR = j;
                 if($("#"+whatGame+" #"+ (++iB) +"_"+ (++jR)).text() == currentMove && $("#"+whatGame+" #"+ (++iB) +"_"+ (++jR)).text() == currentMove){
-                    if(field>3){
+                    if(field == 15){
+                        if($("#"+whatGame+" #"+ (++iB) +"_"+ (++jR)).text() == currentMove && $("#"+whatGame+" #"+ (++iB) +"_"+ (++jR)).text() == currentMove && $("#"+whatGame+" #"+ (++iB) +"_"+ (++jR)).text() == currentMove) win(currentMove, field, whatGame, i, j, iB, jR);
+                    } else if(field>3){
                         if($("#"+whatGame+" #"+ (++iB) +"_"+ (++jR)).text() == currentMove) win(currentMove, field, whatGame, i, j, iB, jR);
                     } else win(currentMove, field, whatGame, i, j, iB, jR);
                 }
                 //Проверка наличия фигурок с ходом в левый нижний угол
                 var iB = i, jR = j;
                 if($("#"+whatGame+" #"+ (++iB) +"_"+ (--jR)).text() == currentMove && $("#"+whatGame+" #"+ (++iB) +"_"+ (--jR)).text() == currentMove){
-                    if(field>3){
+                    if(field == 15){
+                        if($("#"+whatGame+" #"+ (++iB) +"_"+ (--jR)).text() == currentMove && $("#"+whatGame+" #"+ (++iB) +"_"+ (--jR)).text() == currentMove && $("#"+whatGame+" #"+ (++iB) +"_"+ (--jR)).text() == currentMove) win(currentMove, field, whatGame, i, j, iB, jR);
+                    } else if(field>3){
                         if($("#"+whatGame+" #"+ (++iB) +"_"+ (--jR)).text() == currentMove) win(currentMove, field, whatGame, i, j, iB, jR);
                     } else win(currentMove, field, whatGame, i, j, iB, jR);
                 }
@@ -595,22 +604,102 @@ function Bot(whatGame, field, botname, fishka){
     //Функция генерации позиции установки фишки бота
     function generate(){
         posT = true;
-        var numPass = 0;
-        while(taken1 == false){
-            var i = Math.floor(Math.random() * field);
-            var j = Math.floor(Math.random() * field);
-            var move = $("#"+whatGame+" #"+i+"_"+j).text();
-            if (move === " ") {
-                taken1 = true;
-                setup(i, j);
-            } else numPass++;
-            if(numPass >= 3) {
-                taken1 = true;
+        if(field == 15){
+            while(taken1 == false){
+                var arr = [];
+                var n = 0;
                 for(var i = 0; i < field; i++){
                     for(var j = 0; j < field; j++){
-                        if(taken == false){
-                            var move = $("#"+whatGame+" #"+i+"_"+j).text();
-                            if (move === " ") setup(i, j);
+                        if($("#"+whatGame+" #"+i+"_"+j).text() != " "){
+                            arr[n] = i+"_"+j;
+                            n++;
+                        }
+                    }
+                }
+                if(arr.length != 0){
+                    var pos = Math.floor(Math.random() * arr.length);
+                    var elem = arr[pos];
+                    var arr1 = [];
+                    n = 0;
+                    var i = elem.slice(0, elem.indexOf("_"));
+                    var j = elem.slice(elem.indexOf("_") + 1);
+                    var iT = i;
+                    if((--iT) != -1){
+                        arr1[n] = iT+"_"+j;
+                        n++;
+                    }
+                    var iB = i;
+                    if((++iB) != 30){
+                        arr1[n] = iB+"_"+j;
+                        n++;
+                    }
+                    var jR = j;
+                    if((++jR) != 30){
+                        arr1[n] = i+"_"+jR;
+                        n++;
+                    }
+                    var jL = j;
+                    if((--jL) != -1){
+                        arr1[n] = i+"_"+jL;
+                        n++;
+                    }
+                    var iT = i; var jR = j;
+                    if((--iT) != -1 && (++jR) != 30){
+                        arr1[n] = iT+"_"+jR;
+                        n++;
+                    }
+                    var iB = i; var jR = j;
+                    if((++iB) != 30 && (++jR) != 30){
+                        arr1[n] = iB+"_"+jR;
+                        n++;
+                    }
+                    var iB = i; var jL = j;
+                    if((++iB) != 30 && (--jL) != -1){
+                        arr1[n] = iB+"_"+jL;
+                        n++;
+                    }
+                    var iT = i; var jL = j;
+                    if((--iT) != -1 && (--jL) != -1){
+                        arr1[n] = iT+"_"+jL;
+                        n++;
+                    }
+                    var pos = Math.floor(Math.random() * arr1.length);
+                    var elem = arr1[pos];
+                    var posNull = $("#"+whatGame+" #"+elem).text();
+                    if(posNull == " "){
+                        taken1 = true;
+                        var i = elem.slice(0, elem.indexOf("_"));
+                        var j = elem.slice(elem.indexOf("_") + 1);
+                        setup(i, j);
+                    }
+                } else {
+                    var i = Math.floor(Math.random() * field);
+                    var j = Math.floor(Math.random() * field);
+                    var move = $("#"+whatGame+" #"+i+"_"+j).text();
+                    if (move === " ") {
+                        taken1 = true;
+                        setup(i, j);
+                    }
+                }
+            }
+        } else {
+            var numPass = 0;
+            while(taken1 == false){
+                var i = Math.floor(Math.random() * field);
+                var j = Math.floor(Math.random() * field);
+                var move = $("#"+whatGame+" #"+i+"_"+j).text();
+                if (move === " ") {
+                    taken1 = true;
+                    setup(i, j);
+                } else numPass++;
+                if(numPass >= 3) {
+                    taken1 = true;
+                    for(var i = 0; i < field; i++){
+                        for(var j = 0; j < field; j++){
+                            if(taken == false){
+                                var move = $("#"+whatGame+" #"+i+"_"+j).text();
+                                if (move === " ") setup(i, j);
+                            }
                         }
                     }
                 }
@@ -813,10 +902,12 @@ function Bot(whatGame, field, botname, fishka){
             }
         }
     }
+
     for(var i = 0; i < 2; i++){
         if(i == 0) findFishka(fishka);
         else findFishka(" ");
     }
+
     if(sharpNo == true && taken == false) generate();
     if(posT == false && taken == false) generate();
     return 0;
@@ -982,22 +1073,76 @@ function PvP(){
 		socket.emit('click', slot, nickname, noRoom);
 	});
 
+    var may = false;
     //Получение ответа на клик по клетке
 	socket.on('clickON', function(slot, idPlayer) {
         if(idPlayer == turnPlayer[0]){
-            //Получение id клетки
-            var spotTaken = $("#" + slot).text();
-            //Проверка что клетка не занята
-            if (spotTaken === " "){
-                k++;
-                var whatCol = colFishki[idPlayer];
-                $("#" + slot).text(fishki[idPlayer]).css({"color": whatCol});
-                proverka(whatGame, fishki[idPlayer], field);
-                if(gameOn == false){
-                    var a = turnPlayer.shift();
-                    turnPlayer.push(a);
+            if(field == 15){
+                if(k == 0){
+					var spotTaken = $("#" + slot).text();
+					if(spotTaken == " "){
+                        k++;
+                        var whatCol = colFishki[idPlayer];
+                        $("#" + slot).text(fishki[idPlayer]).css({"color": whatCol});
+                        proverka(whatGame, fishki[idPlayer], field);
+                        if(gameOn == false){
+                            var a = turnPlayer.shift();
+                            turnPlayer.push(a);
+                        }
+                        turnPL(turnPlayer, whatGame);
+					}
+				}else{
+					var i = $("#" + slot).attr("id").slice(0, $("#" + slot).attr("id").indexOf("_"));
+					var j = $("#" + slot).attr("id").slice($("#" + slot).attr("id").indexOf("_") + 1);
+					i = +i;
+					j = +j;
+					var jR = j;
+					if($("#"+i+"_"+(++jR)).text() != " ") may = true;
+					var jL = j;
+					if($("#"+i+"_"+(--jL)).text() != " ") may = true;
+					var iB = i;
+					if($("#"+(++iB)+"_"+j).text() != " ") may = true;
+					var iT = i;
+					if($("#"+(--iT)+"_"+j).text() != " ") may = true;
+					var jR = j, iB = i;
+					if($("#"+(++iB)+"_"+(++jR)).text() != " ") may = true;
+					var jL = j, iT = i;
+					if($("#"+(--iT)+"_"+(--jL)).text() != " ") may = true;
+					var jL = j, iB = i;
+					if($("#"+(++iB)+"_"+(--jL)).text() != " ") may = true;
+					var jR = j, iT = i;
+					if($("#"+(--iT)+"_"+(++jR)).text() != " ") may = true;
+					if(may) {
+                        var spotTaken = $("#"+whatGame+" #" + slot).text();
+                        if(spotTaken == " "){
+                            k++;
+                            var whatCol = colFishki[idPlayer];
+                            $("#" + slot).text(fishki[idPlayer]).css({"color": whatCol});
+                            proverka(whatGame, fishki[idPlayer], field);
+                            if(gameOn == false){
+                                var a = turnPlayer.shift();
+                                turnPlayer.push(a);
+                            }
+                            may = false;
+                            turnPL(turnPlayer, whatGame);
+                        }
+					}
+				}
+            } else {
+                //Получение id клетки
+                var spotTaken = $("#"+whatGame+" #" + slot).text();
+                //Проверка что клетка не занята
+                if (spotTaken === " "){
+                    k++;
+                    var whatCol = colFishki[idPlayer];
+                    $("#"+whatGame+" #" + slot).text(fishki[idPlayer]).css({"color": whatCol});
+                    proverka(whatGame, fishki[idPlayer], field);
+                    if(gameOn == false){
+                        var a = turnPlayer.shift();
+                        turnPlayer.push(a);
+                    }
+                    turnPL(turnPlayer, whatGame);
                 }
-                turnPL(turnPlayer, whatGame);
             }
         }
 	});
