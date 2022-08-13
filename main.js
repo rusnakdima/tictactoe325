@@ -454,16 +454,16 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE){
     var beginSlot = $("#"+whatGame+" #"+iB+"_"+jB);
     var endSlot = $("#"+whatGame+" #"+iE+"_"+jE);
     if(iB == iE){
-        if(iB == 0) var centerTB = $(beginSlot).offset().top + 21;
-        else var centerTB = $(beginSlot).offset().top + 26;
+        if(iB == 0) var centerTB = $(beginSlot).offset().top + 15;
+        else var centerTB = $(beginSlot).offset().top + 20;
         var centerLB = $(beginSlot).offset().left - 8;
         var centerLE = $(endSlot).offset().left + $(endSlot).width() - 10;
         var widthLine = centerLE - centerLB;
         var hr = document.createElement("hr");
         $(hr).css({"border":"3px solid white", "position":"absolute", "left": centerLB+"px", "top": centerTB+"px", "width": widthLine+"px", "height": "0px", "margin":"0"}).attr("id", "hrWin");
     } else if(jB == jE){
-        if(jB == 0) var centerLB = $(beginSlot).offset().left + 21;
-        else var centerLB = $(beginSlot).offset().left + 26;
+        if(jB == 0) var centerLB = $(beginSlot).offset().left + 18;
+        else var centerLB = $(beginSlot).offset().left + 20;
         var centerTB = $(beginSlot).offset().top - 8;
         var centerTE = $(endSlot).offset().top + $(endSlot).height();
         var heightLine = centerTE - centerTB;
@@ -482,7 +482,7 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE){
         var hr = document.createElement("hr");
         $(hr).css({"border":"3px solid white", "position":"absolute", "left": centerLB+"px", "top": centerTB+"px", "width": widthLine+"px", "height": "0px", "margin":"0", "transform": "rotateZ(45deg)"}).attr("id", "hrWin");
     } else if(iB < iE && jB > jE){
-        var centerTB = $(beginSlot).offset().top - 10;
+        var centerTB = $(beginSlot).offset().top - 7;
         var centerLB = $(beginSlot).offset().left + $(beginSlot).width();
         var centerTE = $(endSlot).offset().top + $(endSlot).height();
         var centerLE = $(endSlot).offset().left - 10;
