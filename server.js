@@ -19,15 +19,13 @@ mongoose
 
 'use strict';
 
-app.set("port", 3000);
-
 app.get('/', function (request, response) {
   response.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.use("/", express.static(__dirname + '/'));
 
-server.listen(80, function () {
+server.listen(process.env.PORT || 80, function () {
   console.log('http://localhost');
 });
 
