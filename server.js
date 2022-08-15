@@ -27,13 +27,23 @@ app.get('/', function (request, response) {
 
 app.use("/", express.static(__dirname + '/'));
 
-server.listen(process.env.PORT || 3000, function () {
-  console.log('http://localhost:3000');
+server.listen(80, function () {
+  console.log('http://localhost');
 });
 
 var p = -1;
 var r = 0;
 var players = {};
+
+function makeid() {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < 20; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
 
 io.on('connection', function (socket) {
   socket.on('Login', (login) => {
@@ -46,13 +56,21 @@ io.on('connection', function (socket) {
   socket.on('checkPass', (login, pass) => {
     User.findOne({ user: login })
       .then(users => {
-        if (users['pass'] == pass) socket.emit('doneLogin', (login));
+        if (users['pass'] == pass) socket.emit('doneLogin', (users['token']));
         else socket.emit('invalidPass');
       });
   });
   socket.on('settingPass', (login, pass) => {
-    User.create({user: login, pass: pass});
-    socket.emit('doneLogin', (login));
+    var token = makeid();
+    User.create({user: login, pass: pass, token: token});
+    socket.emit('doneLogin', token);
+  });
+  socket.on('getNickToken', (token) => {
+    User.findOne({ token: token })
+      .then(users => {
+        if(users != null) socket.emit('setNickToken', (users['user']));
+        else socket.emit('delToken');
+      });
   });
 
   socket.on("createRoom", () => {
@@ -81,11 +99,13 @@ io.on('connection', function (socket) {
         } else {
           Stats.updateOne({ user: nickname }, { winnings: winnings, draws: draws, losses: losses }, (err, done)=>{})
         }
-      })
-      Stats.find({})
-        .then(stats => {
-          socket.emit('dataStats', stats);
-        })
+        setTimeout(()=>{
+          Stats.find({})
+            .then(stats => {
+              socket.emit('dataStats', stats);
+            });
+        }, 1000)
+      });
   });
 
   socket.on('createLink', (field, player, roomno) => {

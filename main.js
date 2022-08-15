@@ -71,18 +71,6 @@ function setLang() {
 $(() => { setLang(); });
 
 //Следующие четыре условия проверяют не существовуют ключи в куки и в этом случае задают значения
-if (document.cookie.indexOf("winnings=") == -1) {
-  document.cookie = "winnings=" + 0;
-  $("#winnings").html(document.cookie.match(/winnings=(.+?)(;|$)/)[1]);
-}
-if (document.cookie.indexOf("draws=") == -1) {
-  document.cookie = "draws=" + 0;
-  $("#draws").html(document.cookie.match(/draws=(.+?)(;|$)/)[1]);
-}
-if (document.cookie.indexOf("losses=") == -1) {
-  document.cookie = "losses=" + 0;
-  $("#losses").html(document.cookie.match(/losses=(.+?)(;|$)/)[1]);
-}
 if (localStorage["logining"] == undefined) {
   document.cookie = "nickname=Guest";
   $("#nickname").html(document.cookie.match(/nickname=(.+?)(;|$)/)[1]);
@@ -91,14 +79,6 @@ if (document.cookie.indexOf("nickname=") == -1) {
   document.cookie = "nickname=Guest";
   $("#nickname").html(document.cookie.match(/nickname=(.+?)(;|$)/)[1]);
 }
-
-//Обновление статистики каждые полсекунды 
-setInterval(() => {
-  $("#winnings").html(document.cookie.match(/winnings=(.+?)(;|$)/)[1]);
-  $("#draws").html(document.cookie.match(/draws=(.+?)(;|$)/)[1]);
-  $("#losses").html(document.cookie.match(/losses=(.+?)(;|$)/)[1]);
-  $("#nickname").html(document.cookie.match(/nickname=(.+?)(;|$)/)[1]);
-}, 500);
 
 //При клике на вкладку "Профиль" она откроется
 $("#profile").click(function () {
@@ -163,6 +143,18 @@ var botYes = false; //Проверка на участия игры с бото�
 var fishki = ["X", "O", "∆", "□", "◊", "♫", "♡", "♤"]; //Фигурки игроков
 var colFishki = ["#0af", "#0f5", "#f00", "#ff0", "#f0f", "#ffa500", "#FF9999", "#CCFF00"];
 var numMess = 0; //Количество непрочтенных сообщений
+var winnings = 0;
+var draws = 0;
+var losses = 0;
+
+//Обновление статистики каждые полсекунды 
+setInterval(() => {
+  $("#winnings").html(winnings);
+  $("#draws").html(draws);
+  $("#losses").html(losses);
+  if(document.cookie.match(/nickname=(.+?)(;|$)/)[1] == "Guest")
+    $("#nickname").html(document.cookie.match(/nickname=(.+?)(;|$)/)[1]);
+}, 500);
 
 var playerBlock = $(".player");
 playerBlock = Object.values(playerBlock);
@@ -175,6 +167,24 @@ nickBlock = Object.values(nickBlock);
 nickBlock.splice(-2);
 var a = nickBlock.splice(-1)[0];
 nickBlock.unshift(a);
+
+var tempNick = null;
+if(document.cookie.indexOf("token") != -1 && document.cookie.match(/token=(.+?)(;|$)/)[1] != 'null'){
+  socket.emit('getNickToken', document.cookie.match(/token=(.+?)(;|$)/)[1]);
+} else {
+  document.cookie = "nickname=Guest";
+}
+
+socket.on('setNickToken', (nick) => {
+  tempNick = nick;
+  $("#nickname").html(tempNick);
+  document.cookie = "nickname=null";
+  socket.emit('getStats');
+});
+
+socket.on('delToken', () => {
+  document.cookie = "token=null";
+});
 
 //При клике на одну из радиокнопок в переменную будет занесено значение
 $("input[name=field]").click(function () {
@@ -240,10 +250,10 @@ socket.on('dataStats', (stats) => {
     var tr = $('<tr><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Никнэйм" data-eVal="Nickname" id="user"></td><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Победы" data-eVal="Winnigs" id="winnings"></td><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Ничьи" data-eVal="Draws" id="draws"></td><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Проигрыши" data-eVal="Losses" id="losses"></td></tr>');
     $(tableStats).append(tr);
     for (var i = 0; i < Object.keys(stats).length; i++) {
-      if (document.cookie.match(/nickname=(.+?)(;|$)/)[1] == stats[i]['user']) {
-        document.cookie = "winnings=" + stats[i]['winnings'];
-        document.cookie = "draws=" + stats[i]['draws'];
-        document.cookie = "losses=" + stats[i]['losses'];
+      if (tempNick == stats[i]['user']) {
+        winnings = stats[i]['winnings'];
+        draws = stats[i]['draws'];
+        losses = stats[i]['losses'];
       }
       var tr = $("<tr></tr>");
       var td = $("<td class='border-2 border-slate-400 px-2 w-1/6'></td>");
@@ -278,10 +288,6 @@ socket.on('dataStats', (stats) => {
 $("#statistics").click(function () {
   socket.emit('getStats');
 });
-
-setTimeout(function () {
-  if (document.cookie.match(/nickname=(.+?)(;|$)/)[1] != 'Guest') socket.emit('SentStats', document.cookie.match(/nickname=(.+?)(;|$)/)[1], document.cookie.match(/winnings=(.+?)(;|$)/)[1], document.cookie.match(/draws=(.+?)(;|$)/)[1], document.cookie.match(/losses=(.+?)(;|$)/)[1]);
-}, 500);
 
 //Авторизация в игре
 $("#login").click(() => {
@@ -318,10 +324,11 @@ socket.on('invalidPass', () => {
   setLang();
 });
 //Успешная авторизация
-socket.on('doneLogin', (login) => {
-  document.cookie = "nickname=" + login;
+socket.on('doneLogin', (token) => {
+  document.cookie = "token=" + token;
   $("#back, #Login, #ReqPass, #SetPass").hide();
   localStorage["logining"] = true;
+  socket.emit('getNickToken', document.cookie.match(/token=(.+?)(;|$)/)[1]);
 });
 
 //Функция-обработчик по клику на ссылку и дальнейшего добавление в комнату 
@@ -471,19 +478,6 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE) {
   var height = bottomTD - topTD;
   $("#" + whatGame + " #closetic").css({ "top": topTD, "left": leftTD, "height": height, "width": width }).show();
 
-  //Функция отвечающая за увеличение количества побед у игрока(-ов)
-  function winGive() {
-    var winnings = document.cookie.match(/winnings=(.+?)(;|$)/)[1];
-    winnings = +winnings + 1;
-    document.cookie = "winnings=" + winnings;
-    return 0;
-  }
-  //Функция отвечающая за увеличение количества проигрышей у игрока(-ов)
-  function loseGive() {
-    var losses = document.cookie.match(/losses=(.+?)(;|$)/)[1];
-    losses = +losses + 1;
-    document.cookie = "losses=" + losses;
-  }
   //Проверка какой игрок победил и установление цвета тексту, а также запуск ф-ции победы/проигрыша
   var whatCol = colFishki[fishki.indexOf(currentMove)];
   $("#" + whatGame + " #input").css({ "color": whatCol });
@@ -491,9 +485,9 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE) {
   //Выдача побед/проигрышей игрокам
   for (var i = 0; i < fishki.length; i++) {
     if (currentMove === fishki[i]) {
-      if ($("#" + whatGame + " #nickOne").text().indexOf(fishki[i]) != -1) winGive();
+      if ($("#" + whatGame + " #nickOne").text().indexOf(fishki[i]) != -1) winnings += 1;
       for (var j = 0; j < fishki.length; j++) {
-        if (fishki[i] != fishki[j]) if ($("#" + whatGame + " #nickOne").text().indexOf(fishki[j]) != -1) loseGive();
+        if (fishki[i] != fishki[j]) if ($("#" + whatGame + " #nickOne").text().indexOf(fishki[j]) != -1) losses += 1;
       }
       break;
     }
@@ -550,7 +544,7 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE) {
     $(hr).css({ "border": "3px solid white", "position": "absolute", "left": centerLE + "px", "top": centerTB + "px", "width": widthLine + "px", "height": "0px", "margin": "0", "transform": "rotateZ(-45deg)" }).attr("id", "hrWin");
   }
   game.appendChild(hr);
-  if (document.cookie.match(/nickname=(.+?)(;|$)/)[1] != 'Guest') socket.emit('SentStats', document.cookie.match(/nickname=(.+?)(;|$)/)[1], document.cookie.match(/winnings=(.+?)(;|$)/)[1], document.cookie.match(/draws=(.+?)(;|$)/)[1], document.cookie.match(/losses=(.+?)(;|$)/)[1]);
+  if (tempNick != null || document.cookie.match(/nickname=(.+?)(;|$)/)[1] != "Guest") socket.emit('SentStats', tempNick, winnings, draws, losses);
   return 0;
 }
 
@@ -558,9 +552,7 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE) {
 function Draw(field, whatGame) {
   gameOn = true;
   //Получение значения ключа ничья, интерация значения и отправка значения обратно
-  var draws = document.cookie.match(/draws=(.+?)(;|$)/)[1];
-  draws = +draws + 1;
-  document.cookie = "draws=" + draws;
+  draws += 1;
   //Вывод записи в поле о том что ничья
   $("#" + whatGame + " #input").attr("data-rVal", "Это ничья!");
   $("#" + whatGame + " #input").attr("data-eVal", "It is a Draw!");
@@ -582,7 +574,7 @@ function Draw(field, whatGame) {
   $(".player").css({ "background-color": "#000" });
   //Отображение кнопки сброса
   $("#reset").show();
-  if (document.cookie.match(/nickname=(.+?)(;|$)/)[1] != 'Guest') socket.emit('SentStats', document.cookie.match(/nickname=(.+?)(;|$)/)[1], document.cookie.match(/winnings=(.+?)(;|$)/)[1], document.cookie.match(/draws=(.+?)(;|$)/)[1], document.cookie.match(/losses=(.+?)(;|$)/)[1]);
+  if (tempNick != null || document.cookie.match(/nickname=(.+?)(;|$)/)[1] != "Guest") socket.emit('SentStats', tempNick, winnings, draws, losses);
   return 0;
 }
 
@@ -1112,7 +1104,7 @@ function PvP() {
       $("#" + whatGame + " #" + elemId + ", #" + whatGame + " #" + elemId1).show();
   }
 
-  nickname = Math.floor(Math.random() * 90 + 10) + document.cookie.match(/nickname=(.+?)(;|$)/)[1];
+  nickname = Math.floor(Math.random() * 90 + 10) + tempNick;
 
   //Отправление никнейма на сервер
   socket.emit('connectGame', nickname, noRoom);
