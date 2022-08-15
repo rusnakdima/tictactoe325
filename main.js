@@ -227,6 +227,10 @@ socket.on('dataStats', (stats) => {
   setLang();
 });
 
+$("#statistics").click(function () {
+  socket.emit('getStats');
+});
+
 setTimeout(function () {
   if (document.cookie.match(/nickname=(.+?)(;|$)/)[1] != 'Guest') socket.emit('SentStats', document.cookie.match(/nickname=(.+?)(;|$)/)[1], document.cookie.match(/winnings=(.+?)(;|$)/)[1], document.cookie.match(/draws=(.+?)(;|$)/)[1], document.cookie.match(/losses=(.+?)(;|$)/)[1]);
 }, 500);

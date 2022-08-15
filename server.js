@@ -65,15 +65,21 @@ io.on('connection', function (socket) {
     .then(stats => {
       socket.emit('dataStats', stats);
     })
+  
+  socket.on('getStats', ()=>{
+    Stats.find({})
+      .then(stats => {
+        socket.emit('dataStats', stats);
+      })
+  })
+      
   socket.on('SentStats', (nickname, winnings, draws, losses) => {
     Stats.findOne({ user: nickname })
       .then(user => {
         if(user == null){
           Stats.create({ user: nickname, winnings: winnings, draws: draws, losses: losses});
         } else {
-          user.winnings = winnings;
-          user.draws = draws;
-          user.losses = losses;
+          Stats.updateOne({ user: nickname }, { winnings: winnings, draws: draws, losses: losses }, (err, done)=>{})
         }
       })
       Stats.find({})
