@@ -198,33 +198,81 @@ $("input[name=player]").click(function () {
 //Получение данных о статистики
 socket.on('dataStats', (stats) => {
   var outStats = $("#outStats");
-  $(outStats).empty();
-  var tableStats = $("<table class='table-auto w-full'></table>");
-  var tr = $("<tr><td class='border-2 border-slate-400 px-2 w-1/6' data-rVal='Никнэйм' data-eVal='Nickname'></td><td class='border-2 border-slate-400 px-2 w-1/6' data-rVal='Победы' data-eVal='Winnigs'></td><td class='border-2 border-slate-400 px-2 w-1/6' data-rVal='Ничьи' data-eVal='Draws'></td><td class='border-2 border-slate-400 px-2 w-1/6' data-rVal='Проигрыши' data-eVal='Losses'></td></tr>");
-  tableStats.append(tr);
-  for (var i = 0; i < Object.keys(stats).length; i++) {
-    if (document.cookie.match(/nickname=(.+?)(;|$)/)[1] == stats[i]['user']) {
-      document.cookie = "winnings=" + stats[i]['winnings'];
-      document.cookie = "draws=" + stats[i]['draws'];
-      document.cookie = "losses=" + stats[i]['losses'];
+  
+  function Sort(name, znak){
+    for(var i = 0; i < stats.length; i++){
+      for(var j = 0; j < Object.keys(stats).length; j++){
+        if(stats[j+1] != undefined){
+          switch(znak){
+            case '>':
+              if(stats[j][`${name}`] > stats[j+1][`${name}`]){
+                var temp = stats[j+1];
+                stats[j+1] = stats[j];
+                stats[j] = temp;
+              }
+              break;
+            case '<':
+              if(stats[j][`${name}`] < stats[j+1][`${name}`]){
+                var temp = stats[j+1];
+                stats[j+1] = stats[j];
+                stats[j] = temp;
+              }
+              break;
+          }
+        }
+      }
     }
-    var tr = $("<tr></tr>");
-    var td = $("<td class='border-2 border-slate-400 px-2 w-1/6'></td>");
-    $(td).text(stats[i]['user']);
-    tr.append(td);
-    var td = $("<td class='border-2 border-slate-400 px-2 w-1/6'></td>");
-    $(td).text(stats[i]['winnings']);
-    tr.append(td);
-    var td = $("<td class='border-2 border-slate-400 px-2 w-1/6'></td>");
-    $(td).text(stats[i]['draws']);
-    tr.append(td);
-    var td = $("<td class='border-2 border-slate-400 px-2 w-1/6'></td>");
-    $(td).text(stats[i]['losses']);
-    tr.append(td);
-    tableStats.append(tr);
+    switch(znak){
+      case '>':
+        tableSort(name, " ↓");
+        break;
+      case '<':
+        tableSort(name, " ↑");
+        break;
+    }
   }
-  outStats.append(tableStats);
-  setLang();
+  
+  Sort ("winnings", "<");
+
+  function tableSort(name, znak) {
+    $(outStats).empty();
+    var tableStats = $("<table class='table-auto w-full' id='tableStats'></table>");
+    var tr = $('<tr><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Никнэйм" data-eVal="Nickname" id="user"></td><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Победы" data-eVal="Winnigs" id="winnings"></td><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Ничьи" data-eVal="Draws" id="draws"></td><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Проигрыши" data-eVal="Losses" id="losses"></td></tr>');
+    $(tableStats).append(tr);
+    for (var i = 0; i < Object.keys(stats).length; i++) {
+      if (document.cookie.match(/nickname=(.+?)(;|$)/)[1] == stats[i]['user']) {
+        document.cookie = "winnings=" + stats[i]['winnings'];
+        document.cookie = "draws=" + stats[i]['draws'];
+        document.cookie = "losses=" + stats[i]['losses'];
+      }
+      var tr = $("<tr></tr>");
+      var td = $("<td class='border-2 border-slate-400 px-2 w-1/6'></td>");
+      $(td).text(stats[i]['user']);
+      $(tr).append(td);
+      var td = $("<td class='border-2 border-slate-400 px-2 w-1/6'></td>");
+      $(td).text(stats[i]['winnings']);
+      $(tr).append(td);
+      var td = $("<td class='border-2 border-slate-400 px-2 w-1/6'></td>");
+      $(td).text(stats[i]['draws']);
+      $(tr).append(td);
+      var td = $("<td class='border-2 border-slate-400 px-2 w-1/6'></td>");
+      $(td).text(stats[i]['losses']);
+      $(tr).append(td);
+      $(tableStats).append(tr);
+    }
+    outStats.append(tableStats);
+    setLang();
+    $("#tableStats td#" + name).text($("#tableStats td#" + name).text() + znak);
+    $("#tableStats tr:first-child td").click(function(){
+      if($(this).text().indexOf("↑") == -1){
+        var name = $(this).attr("id");
+        Sort (name, "<");
+      } else {
+        var name = $(this).attr("id");
+        Sort (name, ">");
+      }
+    })
+  }
 });
 
 $("#statistics").click(function () {
