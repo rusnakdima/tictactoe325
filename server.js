@@ -44,6 +44,7 @@ function makeid() {
 }
 
 io.on('connection', function (socket) {
+  //Сообщение о входе в систему
   socket.on('Login', (login) => {
     User.findOne({ user: login })
       .then(users => {
@@ -51,6 +52,8 @@ io.on('connection', function (socket) {
         else socket.emit('SetPass', login);
       });
   });
+
+  //Сообщение о проверке пароля
   socket.on('checkPass', (login, pass) => {
     User.findOne({ user: login })
       .then(users => {
@@ -58,11 +61,15 @@ io.on('connection', function (socket) {
         else socket.emit('invalidPass');
       });
   });
+
+  //Сообщение об установке пароля
   socket.on('settingPass', (login, pass) => {
     var token = makeid();
     User.create({user: login, pass: pass, token: token});
     socket.emit('doneLogin', token);
   });
+
+  //Получение никнэйма через токен
   socket.on('getNickToken', (token) => {
     User.findOne({ token: token })
       .then(users => {
@@ -71,24 +78,27 @@ io.on('connection', function (socket) {
       });
   });
 
+  //Создание комнаты и отправка ее номера клиенту
   socket.on("createRoom", () => {
     r++;
     players["no" + r] = {};
     socket.emit('POSTnoRoom', "no" + r);
   });
 
-  Stats.find({})
-    .then(stats => {
-      socket.emit('dataStats', stats);
-    })
+  //Получение данных из статистики и отправка клиенту
+  Stats.find({}).then(stats => {
+    socket.emit('dataStats', stats);
+  });
   
+  //Сообщение об получении данных статистики из БД
   socket.on('getStats', ()=>{
     Stats.find({})
       .then(stats => {
         socket.emit('dataStats', stats);
       })
-  })
-      
+  });
+  
+  //Сообщение об отправке данных статистики клиента в БД 
   socket.on('SentStats', (nickname, winnings, draws, losses) => {
     Stats.findOne({ user: nickname })
       .then(user => {
@@ -105,7 +115,8 @@ io.on('connection', function (socket) {
         }, 1000)
       });
   });
-
+  
+  //Сообщение о создании ссылки
   socket.on('createLink', (field, player, roomno) => {
     var links = fs.readFileSync('link.json');
     links = JSON.parse(links);
@@ -119,7 +130,8 @@ io.on('connection', function (socket) {
     var data = JSON.stringify(links);
     fs.writeFileSync('link.json', data);
   });
-
+  
+  //Сообщение о получении ссылок из файла
   socket.on("GETLinks", () => {
     var links = fs.readFileSync('link.json');
     links = JSON.parse(links);
@@ -169,6 +181,7 @@ io.on('connection', function (socket) {
     io.sockets.emit("clearLinks");
   });
 
+  //Удаление бота из комнаты
   socket.on('delBot', (roomno) => {
     var pos = null;
     for (var i = Object.values(players[roomno]).length - 1; i >= 0; i--) {
@@ -180,6 +193,7 @@ io.on('connection', function (socket) {
     if (pos != null) exit(roomno, players[roomno][pos]);
   });
 
+  //Сообщение об отправке сообщение в чат
   socket.on("sendMess", (text, nickname, roomno) => {
     io.to("room-" + roomno).emit('messPost', text, nickname);
   });
@@ -207,6 +221,7 @@ io.on('connection', function (socket) {
     io.to("room-" + roomno).emit('reset');
   });
 
+  //Функция выхода из комнаты
   function exit(roomno, nickname) {
     var numNick = Object.values(players[roomno]).indexOf(nickname);
     for (var i = numNick; i < Object.keys(players[roomno]).length; i++)
@@ -217,9 +232,8 @@ io.on('connection', function (socket) {
     links = JSON.parse(links);
     if (Object.keys(players[roomno]).length == 0) {
       delete players[roomno];
-      var obj = links;
-      delete obj[roomno];
-      var data = JSON.stringify(obj);
+      delete links[roomno];
+      var data = JSON.stringify(links);
       fs.writeFileSync('link.json', data);
     } else {
       workOnLinks(roomno);
@@ -229,9 +243,8 @@ io.on('connection', function (socket) {
       }
       if (numPl == 0) {
         delete players[roomno];
-        var obj = links;
-        delete obj[roomno];
-        var data = JSON.stringify(obj);
+        delete links[roomno];
+        var data = JSON.stringify(links);
         fs.writeFileSync('link.json', data);
       }
     }
@@ -243,9 +256,9 @@ io.on('connection', function (socket) {
     } else {
       io.sockets.emit('AddLinks', roomno, 0, 0, 0, 0);
     }
+    if (nickname.indexOf('Bot') == -1) socket.leave("room-" + roomno);
     io.to("room-" + roomno).emit('players', players[roomno]);
     io.to("room-" + roomno).emit('reset');
-    if (nickname.indexOf('Bot') == -1) socket.leave("room-" + roomno);
   }
 
   //Отключение пользователя из комнаты
@@ -253,6 +266,7 @@ io.on('connection', function (socket) {
     exit(roomno, nickname);
   });
 
+  //Событие о выходе пользователя из сайта
   socket.on('disconnect', () => {
     if (socket.username != undefined) {
       var nickname = socket.username;

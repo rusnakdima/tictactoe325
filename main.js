@@ -168,7 +168,7 @@ nickBlock.splice(-2);
 var a = nickBlock.splice(-1)[0];
 nickBlock.unshift(a);
 
-var tempNick = null;
+var tempNick = "Guest";
 if(document.cookie.indexOf("token") != -1 && document.cookie.match(/token=(.+?)(;|$)/)[1] != 'null'){
   socket.emit('getNickToken', document.cookie.match(/token=(.+?)(;|$)/)[1]);
 } else {
@@ -434,8 +434,6 @@ function exitgame() {
   gameOn = false;
   turnPlayer = [];
   socket.emit("exitGame", noRoom, nickname);
-  socket.emit('getPlayers', noRoom);
-  socket.emit('clickReset', noRoom);
   $("footer").show();
   if ($("#opengame").css("color") == "rgb(255, 255, 255)") {
     $(".opengame").show();
