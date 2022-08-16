@@ -7,13 +7,8 @@ $(".creategame").hide();
 $("#creategame").css({ "color": "#aaa" });
 $(".statistics").hide();
 $("#statistics").css({ "color": "#aaa" });
-$("#back").hide();
-$("#Login").hide();
-$("#ReqPass").hide();
-$("#SetPass").hide();
-$("#game1").hide();
-$(".Wait").hide();
-$("#chat").hide();
+$("#back, #Login, #ReqPass, #SetPass, #game1, .Wait, #chat").hide();
+$("#addBot").show();
 var playRadAll = $("input[name=player]");
 for (var i = 0; i < playRadAll.length; i++) {
   $(playRadAll[i]).prop('disabled', true).prop('checked', false);
@@ -445,6 +440,7 @@ function exitgame() {
   $("#game1").hide();
   $("#tablegame1").empty();
   $("#outChat").empty();
+  $(".hrWin").remove();
   $("#chat").css({ "display": "none" });
   $("#game1 #input").css({ "color": "white", "display": "none" }).html("");
   $("#game1 #closetic").hide();
@@ -507,7 +503,7 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE) {
     var centerLE = $(endSlot).offset().left + $(endSlot).width() - 10;
     var widthLine = centerLE - centerLB;
     var hr = document.createElement("hr");
-    $(hr).css({ "border": "3px solid white", "position": "absolute", "left": centerLB + "px", "top": centerTB + "px", "width": widthLine + "px", "height": "0px", "margin": "0" }).attr("id", "hrWin");
+    $(hr).css({ "border": "3px solid white", "position": "absolute", "left": centerLB + "px", "top": centerTB + "px", "width": widthLine + "px", "height": "0px", "margin": "0" }).attr("class", "hrWin");
   } else if (jB == jE) {
     if (jB == 0) var centerLB = $(beginSlot).offset().left + 18;
     else var centerLB = $(beginSlot).offset().left + 20;
@@ -515,7 +511,7 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE) {
     var centerTE = $(endSlot).offset().top + $(endSlot).height();
     var heightLine = centerTE - centerTB;
     var hr = document.createElement("hr");
-    $(hr).css({ "border": "3px solid white", "position": "absolute", "left": centerLB + "px", "top": centerTB + "px", "width": "0px", "height": heightLine + "px", "margin": "0" }).attr("id", "hrWin");
+    $(hr).css({ "border": "3px solid white", "position": "absolute", "left": centerLB + "px", "top": centerTB + "px", "width": "0px", "height": heightLine + "px", "margin": "0" }).attr("class", "hrWin");
   } else if (iB < iE && jB < jE) {
     var centerTB = $(beginSlot).offset().top - 10;
     var centerLB = $(beginSlot).offset().left - 10;
@@ -527,7 +523,7 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE) {
     centerTB += (centerTE - $(beginSlot).offset().top) / 2;
     centerLB -= (widthLine - (centerLE - $(beginSlot).offset().left)) / 2;
     var hr = document.createElement("hr");
-    $(hr).css({ "border": "3px solid white", "position": "absolute", "left": centerLB + "px", "top": centerTB + "px", "width": widthLine + "px", "height": "0px", "margin": "0", "transform": "rotateZ(45deg)" }).attr("id", "hrWin");
+    $(hr).css({ "border": "3px solid white", "position": "absolute", "left": centerLB + "px", "top": centerTB + "px", "width": widthLine + "px", "height": "0px", "margin": "0", "transform": "rotateZ(45deg)" }).attr("class", "hrWin");
   } else if (iB < iE && jB > jE) {
     var centerTB = $(beginSlot).offset().top - 7;
     var centerLB = $(beginSlot).offset().left + $(beginSlot).width();
@@ -539,7 +535,7 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE) {
     centerTB += (centerTE - $(beginSlot).offset().top) / 2;
     centerLE -= (widthLine - (centerLB - centerLE)) / 2;
     var hr = document.createElement("hr");
-    $(hr).css({ "border": "3px solid white", "position": "absolute", "left": centerLE + "px", "top": centerTB + "px", "width": widthLine + "px", "height": "0px", "margin": "0", "transform": "rotateZ(-45deg)" }).attr("id", "hrWin");
+    $(hr).css({ "border": "3px solid white", "position": "absolute", "left": centerLE + "px", "top": centerTB + "px", "width": widthLine + "px", "height": "0px", "margin": "0", "transform": "rotateZ(-45deg)" }).attr("class", "hrWin");
   }
   game.appendChild(hr);
   if (tempNick != null || document.cookie.match(/nickname=(.+?)(;|$)/)[1] != "Guest") socket.emit('SentStats', tempNick, winnings, draws, losses);
@@ -1090,9 +1086,6 @@ function PvP() {
   //Отображение блока ожидание игроков
   $(".Wait").show();
 
-  //Скрыть кнопку добавления ботов
-  $("#addBot").hide();
-
   //Отображение блоков с именами присутствующих игроков если они есть в данной игре
   for (var i = 1; i < playerBlock.length; i++) {
     var elemId = $(playerBlock[i]).attr("id");
@@ -1211,9 +1204,6 @@ function PvP() {
     }
     //Стирание имени пользователя когда он выходит
     for (var i = 0; i < nickBlock.length; i++) $(nickBlock[i]).html("NaN");
-    //Присваивание никнэймов в блоки для игроков
-
-    $("#addBot").show();
 
     var k = 0;
     var nickBlock1 = $(".nickBlock");
@@ -1260,7 +1250,7 @@ function PvP() {
     k = 0;
     $(".tic").html(" ").css("color", "white");
     $("#game1 #input").css({ "color": "white", "display": "none" }).html("");
-    $("#hrWin").remove();
+    $(".hrWin").remove();
     $("#reset").hide();
     $("#game1 #closetic").hide();
     turnPL(turnPlayer, whatGame);
