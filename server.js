@@ -84,11 +84,6 @@ io.on('connection', function (socket) {
     players["no" + r] = {};
     socket.emit('POSTnoRoom', "no" + r);
   });
-
-  //Получение данных из статистики и отправка клиенту
-  Stats.find({}).then(stats => {
-    socket.emit('dataStats', stats);
-  });
   
   //Сообщение об получении данных статистики из БД
   socket.on('getStats', ()=>{
@@ -97,7 +92,7 @@ io.on('connection', function (socket) {
         socket.emit('dataStats', stats);
       })
   });
-  
+
   //Сообщение об отправке данных статистики клиента в БД 
   socket.on('SentStats', (nickname, winnings, draws, losses) => {
     Stats.findOne({ user: nickname })
@@ -115,7 +110,7 @@ io.on('connection', function (socket) {
         }, 1000)
       });
   });
-  
+
   //Сообщение о создании ссылки
   socket.on('createLink', (field, player, roomno) => {
     var links = fs.readFileSync('link.json');
@@ -130,7 +125,7 @@ io.on('connection', function (socket) {
     var data = JSON.stringify(links);
     fs.writeFileSync('link.json', data);
   });
-  
+
   //Сообщение о получении ссылок из файла
   socket.on("GETLinks", () => {
     var links = fs.readFileSync('link.json');
@@ -161,10 +156,7 @@ io.on('connection', function (socket) {
       player: links[roomno]["player"]
     }
     links[roomno] = link;
-    if (links[roomno]["num_player"] == 0) {
-      var obj = links;
-      delete obj[roomno];
-    }
+    if (links[roomno]["num_player"] == 0) delete links[roomno];
     var data = JSON.stringify(links);
     fs.writeFileSync('link.json', data);
   }
@@ -223,19 +215,19 @@ io.on('connection', function (socket) {
 
   //Функция выхода из комнаты
   function exit(roomno, nickname) {
-    var numNick = Object.values(players[roomno]).indexOf(nickname);
-    for (var i = numNick; i < Object.keys(players[roomno]).length; i++)
-      players[roomno][i] = players[roomno][i + 1];
-    delete players[roomno][Object.keys(players[roomno]).length - 1];
-
     var links = fs.readFileSync('link.json');
     links = JSON.parse(links);
-    if (Object.keys(players[roomno]).length == 0) {
+    if (Object.keys(players[roomno]).length == 1) {
       delete players[roomno];
       delete links[roomno];
       var data = JSON.stringify(links);
       fs.writeFileSync('link.json', data);
     } else {
+      var numNick = Object.values(players[roomno]).indexOf(nickname);
+      for (var i = numNick; i < Object.keys(players[roomno]).length; i++)
+        players[roomno][i] = players[roomno][i + 1];
+      delete players[roomno][Object.keys(players[roomno]).length - 1];
+    
       workOnLinks(roomno);
       var numPl = 0;
       for (var i = 0; i < Object.keys(players[roomno]).length; i++) {
@@ -249,13 +241,7 @@ io.on('connection', function (socket) {
       }
     }
 
-    var links = fs.readFileSync('link.json');
-    links = JSON.parse(links);
-    if (Object.keys(links).indexOf(roomno) != -1) {
-      io.sockets.emit("clearLinks");
-    } else {
-      io.sockets.emit('AddLinks', roomno, 0, 0, 0, 0);
-    }
+    io.sockets.emit("clearLinks");
     if (nickname.indexOf('Bot') == -1) socket.leave("room-" + roomno);
     io.to("room-" + roomno).emit('players', players[roomno]);
     io.to("room-" + roomno).emit('reset');

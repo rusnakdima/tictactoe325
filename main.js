@@ -200,6 +200,9 @@ $("input[name=player]").click(function () {
   player = $(this).attr("id").slice(-1);
 });
 
+//Сообщение запрос статистики игрока
+socket.emit('getStats');
+
 //Получение данных о статистики
 socket.on('dataStats', (stats) => {
   var outStats = $("#outStats");
@@ -386,6 +389,7 @@ function hyperCreate(roomno, nickname, field1, num_player1, player1) {
 }
 
 //Получение данных из JSON файла
+$("#hyperlink").empty();
 socket.emit("GETLinks");
 
 //Обновление ссылок при нажатии на вкладку Открытые
@@ -402,13 +406,7 @@ socket.on("clearLinks", () => {
 
 //Сообщение от сервера на создание ссылок
 socket.on("AddLinks", (roomno, nickname, field, num_player, player) => {
-  if (field == 0 && num_player == 0 && player == 0) {
-    var hyperlink = document.querySelector("#hyperlink");
-    var hyperLink = document.querySelector("#" + roomno);
-    hyperlink.removeChild(hyperLink);
-  } else {
-    hyperCreate(roomno, nickname, field, num_player, player);
-  }
+  hyperCreate(roomno, nickname, field, num_player, player);
 });
 
 //Разрешение на вход в игру
