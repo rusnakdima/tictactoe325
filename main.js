@@ -65,16 +65,6 @@ function setLang() {
 //Вызов функции на стадии загрузки страницы
 $(() => { setLang(); });
 
-//Следующие четыре условия проверяют не существовуют ключи в куки и в этом случае задают значения
-if (localStorage["logining"] == undefined) {
-  document.cookie = "nickname=Guest";
-  $("#nickname").html(document.cookie.match(/nickname=(.+?)(;|$)/)[1]);
-}
-if (document.cookie.indexOf("nickname=") == -1) {
-  document.cookie = "nickname=Guest";
-  $("#nickname").html(document.cookie.match(/nickname=(.+?)(;|$)/)[1]);
-}
-
 //При клике на вкладку "Профиль" она откроется
 $("#profile").click(function () {
   $(".profile").show();
@@ -138,17 +128,17 @@ var botYes = false; //Проверка на участия игры с бото�
 var fishki = ["X", "O", "∆", "□", "◊", "♫", "♡", "♤"]; //Фигурки игроков
 var colFishki = ["#0af", "#0f5", "#f00", "#ff0", "#f0f", "#ffa500", "#FF9999", "#CCFF00"];
 var numMess = 0; //Количество непрочтенных сообщений
-var winnings = 0;
-var draws = 0;
-var losses = 0;
+var tempNick = "Guest"; //Временное имя игрока
+var winnings = 0; //Количество побед
+var draws = 0; //Количество ничьих
+var losses = 0; //Количество проигрышей
 
 //Обновление статистики каждые полсекунды 
 setInterval(() => {
   $("#winnings").html(winnings);
   $("#draws").html(draws);
   $("#losses").html(losses);
-  if(document.cookie.match(/nickname=(.+?)(;|$)/)[1] == "Guest")
-    $("#nickname").html(document.cookie.match(/nickname=(.+?)(;|$)/)[1]);
+  $("#nickname").html(tempNick);
 }, 500);
 
 var playerBlock = $(".player");
@@ -163,17 +153,12 @@ nickBlock.splice(-2);
 var a = nickBlock.splice(-1)[0];
 nickBlock.unshift(a);
 
-var tempNick = "Guest";
 if(document.cookie.indexOf("token") != -1 && document.cookie.match(/token=(.+?)(;|$)/)[1] != 'null'){
   socket.emit('getNickToken', document.cookie.match(/token=(.+?)(;|$)/)[1]);
-} else {
-  document.cookie = "nickname=Guest";
 }
 
 socket.on('setNickToken', (nick) => {
   tempNick = nick;
-  $("#nickname").html(tempNick);
-  document.cookie = "nickname=null";
   socket.emit('getStats');
 });
 
@@ -325,7 +310,6 @@ socket.on('invalidPass', () => {
 socket.on('doneLogin', (token) => {
   document.cookie = "token=" + token;
   $("#back, #Login, #ReqPass, #SetPass").hide();
-  localStorage["logining"] = true;
   socket.emit('getNickToken', document.cookie.match(/token=(.+?)(;|$)/)[1]);
 });
 
@@ -536,7 +520,7 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE) {
     $(hr).css({ "border": "3px solid white", "position": "absolute", "left": centerLE + "px", "top": centerTB + "px", "width": widthLine + "px", "height": "0px", "margin": "0", "transform": "rotateZ(-45deg)" }).attr("class", "hrWin");
   }
   game.appendChild(hr);
-  if (tempNick != null || document.cookie.match(/nickname=(.+?)(;|$)/)[1] != "Guest") socket.emit('SentStats', tempNick, winnings, draws, losses);
+  if (tempNick != "Guest") socket.emit('SentStats', tempNick, winnings, draws, losses);
   return 0;
 }
 
@@ -566,7 +550,7 @@ function Draw(field, whatGame) {
   $(".player").css({ "background-color": "#000" });
   //Отображение кнопки сброса
   $("#reset").show();
-  if (tempNick != null || document.cookie.match(/nickname=(.+?)(;|$)/)[1] != "Guest") socket.emit('SentStats', tempNick, winnings, draws, losses);
+  if (tempNick != "Guest") socket.emit('SentStats', tempNick, winnings, draws, losses);
   return 0;
 }
 
@@ -649,7 +633,7 @@ function Bot(whatGame, field, botname, fishka) {
         var n = 0;
         for (var i = 0; i < field; i++) {
           for (var j = 0; j < field; j++) {
-            if ($("#" + whatGame + " #" + i + "_" + j).text() != "") {
+            if ($("#" + whatGame + " #" + i + "_" + j).text() != " ") {
               arr[n] = i + "_" + j;
               n++;
             }
@@ -683,43 +667,41 @@ function Bot(whatGame, field, botname, fishka) {
             n++;
           }
           var iT = i; var jR = j;
-          if ((--iT) != -1 && (++jR) != field) {
+          if ((--iT) != -1 || (++jR) != field) {
             arr1[n] = iT + "_" + jR;
             n++;
           }
           var iB = i; var jR = j;
-          if ((++iB) != field && (++jR) != field) {
+          if ((++iB) != field || (++jR) != field) {
             arr1[n] = iB + "_" + jR;
             n++;
           }
           var iB = i; var jL = j;
-          if ((++iB) != field && (--jL) != -1) {
+          if ((++iB) != field || (--jL) != -1) {
             arr1[n] = iB + "_" + jL;
             n++;
           }
           var iT = i; var jL = j;
-          if ((--iT) != -1 && (--jL) != -1) {
+          if ((--iT) != -1 || (--jL) != -1) {
             arr1[n] = iT + "_" + jL;
             n++;
           }
           var pos = Math.floor(Math.random() * arr1.length);
           var elem = arr1[pos];
           var posNull = $("#" + whatGame + " #" + elem).text();
-          if (posNull == "") {
+          if (posNull == " ") {
             taken1 = true;
             var i = elem.slice(0, elem.indexOf("_"));
             var j = elem.slice(elem.indexOf("_") + 1);
             setup(i, j);
-            break;
           }
         } else {
           var i = Math.floor(Math.random() * field);
           var j = Math.floor(Math.random() * field);
           var move = $("#" + whatGame + " #" + i + "_" + j).text();
-          if (move === "") {
+          if (move === " ") {
             taken1 = true;
             setup(i, j);
-            break;
           }
         }
       }
@@ -729,10 +711,9 @@ function Bot(whatGame, field, botname, fishka) {
         var i = Math.floor(Math.random() * field);
         var j = Math.floor(Math.random() * field);
         var move = $("#" + whatGame + " #" + i + "_" + j).text();
-        if (move === "") {
+        if (move === " ") {
           taken1 = true;
           setup(i, j);
-          break;
         } else numPass++;
         if (numPass >= 3) {
           taken1 = true;
@@ -740,10 +721,7 @@ function Bot(whatGame, field, botname, fishka) {
             for (var j = 0; j < field; j++) {
               if (taken == false) {
                 var move = $("#" + whatGame + " #" + i + "_" + j).text();
-                if (move === "") {
-                  setup(i, j);
-                  break;
-                }
+                if (move === " ") setup(i, j);
               }
             }
           }
@@ -759,183 +737,183 @@ function Bot(whatGame, field, botname, fishka) {
     for (var i = 0; i < field; i++) {
       for (var j = 0; j < field; j++) {
         if (taken == false) {
-          if (elem == "") bool = ($("#" + whatGame + " #" + i + "_" + j).text() != elem);
+          if (elem == " ") bool = ($("#" + whatGame + " #" + i + "_" + j).text() != elem);
           else bool = ($("#" + whatGame + " #" + i + "_" + j).text() == elem);
           if (bool) {
             var figure = $("#" + whatGame + " #" + i + "_" + j).text();
             //Поиск фигурки бота c ходом вправо
             var jR = j;
             if ($("#" + whatGame + " #" + i + "_" + (++jR)).text() == figure) {
-              if (elem == "" && field > 3) {
+              if (elem == " " && field > 3) {
                 if ($("#" + whatGame + " #" + i + "_" + (++jR)).text() == figure) {
                   var move = $("#" + whatGame + " #" + i + "_" + (++jR)).text();
-                  if (move === "") { setup(i, jR); break; }
+                  if (move === " ") { setup(i, jR); }
                   else sharpNo = true;
                 } else if ($("#" + whatGame + " #" + i + "_" + (++jR)).text() == figure) {
                   var move = $("#" + whatGame + " #" + i + "_" + (--jR)).text();
-                  if (move === "") { setup(i, jR); break; }
+                  if (move === " ") { setup(i, jR); }
                   else sharpNo = true;
                 } else sharpNo = true;
               } else {
                 var move = $("#" + whatGame + " #" + i + "_" + (++jR)).text();
-                if (move === "") { setup(i, jR); break; }
+                if (move === " ") { setup(i, jR); }
                 else sharpNo = true;
               }
             } else if ($("#" + whatGame + " #" + i + "_" + (++jR)).text() == figure) {
               if (field == 3) {
                 var move = $("#" + whatGame + " #" + i + "_" + (--jR)).text();
-                if (move === "") { setup(i, jR); break; }
+                if (move === " ") { setup(i, jR); }
                 else sharpNo = true;
               }
             } else sharpNo = true;
             //Поиск элемента X или O c ходом влево
             var jL = j;
             if ($("#" + whatGame + " #" + i + "_" + (--jL)).text() == figure) {
-              if (elem == "" && field > 3) {
+              if (elem == " " && field > 3) {
                 if ($("#" + whatGame + " #" + i + "_" + (--jL)).text() == figure) {
                   var move = $("#" + whatGame + " #" + i + "_" + (--jL)).text();
-                  if (move === "") { setup(i, jL); break; }
+                  if (move === " ") { setup(i, jL); }
                   else sharpNo = true;
                 } else if ($("#" + whatGame + " #" + i + "_" + (--jL)).text() == figure) {
                   var move = $("#" + whatGame + " #" + i + "_" + (++jL)).text();
-                  if (move === "") { setup(i, jL); break; }
+                  if (move === " ") { setup(i, jL); }
                   else sharpNo = true;
                 } else sharpNo = true;
               } else {
                 var move = $("#" + whatGame + " #" + i + "_" + (--jL)).text();
-                if (move === "") { setup(i, jL); break; }
+                if (move === " ") { setup(i, jL); }
                 else sharpNo = true;
               }
             } else sharpNo = true;
             //Поиск элемента X или O c ходом вниз
             var iB = i;
             if ($("#" + whatGame + " #" + (++iB) + "_" + j).text() == figure) {
-              if (elem == "" && field > 3) {
+              if (elem == " " && field > 3) {
                 if ($("#" + whatGame + " #" + (++iB) + "_" + j).text() == figure) {
                   var move = $("#" + whatGame + " #" + (++iB) + "_" + j).text();
-                  if (move === "") { setup(iB, j); break; }
+                  if (move === " ") { setup(iB, j); }
                   else sharpNo = true;
                 } else if ($("#" + whatGame + " #" + (++iB) + "_" + j).text() == figure) {
                   var move = $("#" + whatGame + " #" + (--iB) + "_" + j).text();
-                  if (move === "") { setup(iB, j); break; }
+                  if (move === " ") { setup(iB, j); }
                   else sharpNo = true;
                 } else sharpNo = true;
               } else {
                 var move = $("#" + whatGame + " #" + (++iB) + "_" + j).text();
-                if (move === "") { setup(iB, j); break; }
+                if (move === " ") { setup(iB, j); }
                 else sharpNo = true;
               }
             } else if ($("#" + whatGame + " #" + (++iB) + "_" + j).text() == figure) {
               if (field == 3) {
                 var move = $("#" + whatGame + " #" + (--iB) + "_" + j).text();
-                if (move === "") { setup(iB, j); break; }
+                if (move === " ") { setup(iB, j); }
                 else sharpNo = true;
               }
             } else sharpNo = true;
             //Поиск элемента X или O c ходом вверх
             var iT = i;
             if ($("#" + whatGame + " #" + (--iT) + "_" + j).text() == figure) {
-              if (elem == "" && field > 3) {
+              if (elem == " " && field > 3) {
                 if ($("#" + whatGame + " #" + (--iT) + "_" + j).text() == figure) {
                   var move = $("#" + whatGame + " #" + (--iT) + "_" + j).text();
-                  if (move === "") { setup(iT, j); break; }
+                  if (move === " ") { setup(iT, j); }
                   else sharpNo = true;
                 } else if ($("#" + whatGame + " #" + (--iT) + "_" + j).text() == figure) {
                   var move = $("#" + whatGame + " #" + (++iT) + "_" + j).text();
-                  if (move === "") { setup(iT, j); break; }
+                  if (move === " ") { setup(iT, j); }
                   else sharpNo = true;
                 } else sharpNo = true;
               } else {
                 var move = $("#" + whatGame + " #" + (--iT) + "_" + j).text();
-                if (move === "") { setup(iT, j); break; }
+                if (move === " ") { setup(iT, j); }
                 else sharpNo = true;
               }
             } else sharpNo = true;
             //Поиск элемента X или O c ходом в правый нижний угол
             var iB = i, jR = j;
             if ($("#" + whatGame + " #" + (++iB) + "_" + (++jR)).text() == figure) {
-              if (elem == "" && field > 3) {
+              if (elem == " " && field > 3) {
                 if ($("#" + whatGame + " #" + (++iB) + "_" + (++jR)).text() == figure) {
                   var move = $("#" + whatGame + " #" + (++iB) + "_" + (++jR)).text();
-                  if (move === "") { setup(iB, jR); break; }
+                  if (move === " ") { setup(iB, jR); }
                   else sharpNo = true;
                 } else if ($("#" + whatGame + " #" + (++iB) + "_" + (++jR)).text() == figure) {
                   var move = $("#" + whatGame + " #" + (--iB) + "_" + (--jR)).text();
-                  if (move === "") { setup(iB, jR); break; }
+                  if (move === " ") { setup(iB, jR); }
                   else sharpNo = true;
                 } else sharpNo = true;
               } else {
                 var move = $("#" + whatGame + " #" + (++iB) + "_" + (++jR)).text();
-                if (move === "") { setup(iB, jR); break; }
+                if (move === " ") { setup(iB, jR); }
                 else sharpNo = true;
               }
             } else if ($("#" + whatGame + " #" + (++iB) + "_" + (++jR)).text() == figure) {
               if (field == 3) {
                 var move = $("#" + whatGame + " #" + (--iB) + "_" + (--jR)).text();
-                if (move === "") { setup(iB, jR); break; }
+                if (move === " ") { setup(iB, jR); }
                 else sharpNo = true;
               }
             } else sharpNo = true;
             //Поиск элемента X или O c ходом в левый верхний угол
             var iT = i, jL = j;
             if ($("#" + whatGame + " #" + (--iT) + "_" + (--jL)).text() == figure) {
-              if (elem == "" && field > 3) {
+              if (elem == " " && field > 3) {
                 if ($("#" + whatGame + " #" + (--iT) + "_" + (--jL)).text() == figure) {
                   var move = $("#" + whatGame + " #" + (--iT) + "_" + (--jL)).text();
-                  if (move === "") { setup(iT, jL); break; }
+                  if (move === " ") { setup(iT, jL); }
                   else sharpNo = true;
                 } else if ($("#" + whatGame + " #" + (--iT) + "_" + (--jL)).text() == figure) {
                   var move = $("#" + whatGame + " #" + (++iT) + "_" + (++jL)).text();
-                  if (move === "") { setup(iT, jL); break; }
+                  if (move === " ") { setup(iT, jL); }
                   else sharpNo = true;
                 } else sharpNo = true;
               } else {
                 var move = $("#" + whatGame + " #" + (--iT) + "_" + (--jL)).text();
-                if (move === "") { setup(iT, jL); break; }
+                if (move === " ") { setup(iT, jL); }
                 else sharpNo = true;
               }
             } else sharpNo = true;
             //Поиск элемента X или O c ходом в левый нижний угол
             var iB = i, jL = j;
             if ($("#" + whatGame + " #" + (++iB) + "_" + (--jL)).text() == figure) {
-              if (elem == "" && field > 3) {
+              if (elem == " " && field > 3) {
                 if ($("#" + whatGame + " #" + (++iB) + "_" + (--jL)).text() == figure) {
                   var move = $("#" + whatGame + " #" + (++iB) + "_" + (--jL)).text();
-                  if (move === "") { setup(iB, jL); break; }
+                  if (move === " ") { setup(iB, jL); }
                   else sharpNo = true;
                 } else if ($("#" + whatGame + " #" + (++iB) + "_" + (--jL)).text() == figure) {
                   var move = $("#" + whatGame + " #" + (--iB) + "_" + (++jL)).text();
-                  if (move === "") { setup(iB, jL); break; }
+                  if (move === " ") { setup(iB, jL); }
                   else sharpNo = true;
                 } else sharpNo = true;
               } else {
                 var move = $("#" + whatGame + " #" + (++iB) + "_" + (--jL)).text();
-                if (move === "") { setup(iB, jL); break; }
+                if (move === " ") { setup(iB, jL); }
                 else sharpNo = true;
               }
             } else if ($("#" + whatGame + " #" + (++iB) + "_" + (--jL)).text() == figure) {
               if (field == 3) {
                 var move = $("#" + whatGame + " #" + (--iB) + "_" + (++jL)).text();
-                if (move === "") { setup(iB, jL); break; }
+                if (move === " ") { setup(iB, jL); }
                 else sharpNo = true;
               }
             } else sharpNo = true;
             //Поиск элемента X или O c ходом в правый верхний угол
             var iT = i, jR = j;
             if ($("#" + whatGame + " #" + (--iT) + "_" + (++jR)).text() == figure) {
-              if (elem == "" && field > 3) {
+              if (elem == " " && field > 3) {
                 if ($("#" + whatGame + " #" + (--iT) + "_" + (++jR)).text() == figure) {
                   var move = $("#" + whatGame + " #" + (--iT) + "_" + (++jR)).text();
-                  if (move === "") { setup(iT, jR); break; }
+                  if (move === " ") { setup(iT, jR); }
                   else sharpNo = true;
                 } else if ($("#" + whatGame + " #" + (--iT) + "_" + (++jR)).text() == figure) {
                   var move = $("#" + whatGame + " #" + (++iT) + "_" + (--jR)).text();
-                  if (move === "") { setup(iT, jR); break; }
+                  if (move === " ") { setup(iT, jR); }
                   else sharpNo = true;
                 } else sharpNo = true;
               } else {
                 var move = $("#" + whatGame + " #" + (--iT) + "_" + (++jR)).text();
-                if (move === "") { setup(iT, jR); break; }
+                if (move === " ") { setup(iT, jR); }
                 else sharpNo = true;
               }
             } else sharpNo = true;
@@ -950,7 +928,7 @@ function Bot(whatGame, field, botname, fishka) {
 
   for (var i = 0; i < 2; i++) {
     if (i == 0) findFishka(fishka);
-    else findFishka("");
+    else findFishka(" ");
   }
 
   if (sharpNo == true && taken == false) generate();
@@ -1121,11 +1099,11 @@ function PvP() {
     if (idPlayer == turnPlayer[0]) {
       if (field == 15 && Players[idPlayer].slice(2) != "Bot") {
         if (k == 0) {
-          var spotTaken = $("#" + slot).text();
-          if (spotTaken == "") {
+          var spotTaken = $("#" + whatGame + " #" + slot).text();
+          if (spotTaken == " ") {
             k++;
             var whatCol = colFishki[idPlayer];
-            $("#" + slot).text(fishki[idPlayer]).css({ "color": whatCol });
+            $("#" + whatGame + " #" + slot).text(fishki[idPlayer]).css({ "color": whatCol });
             proverka(whatGame, fishki[idPlayer], field);
             if (gameOn == false) {
               var a = turnPlayer.shift();
@@ -1139,27 +1117,27 @@ function PvP() {
           i = +i;
           j = +j;
           var jR = j;
-          if ($("#" + i + "_" + (++jR)).text() != "") may = true;
+          if ($("#" + i + "_" + (++jR)).text() != " " && $("#" + i + "_" + (++jR)).text() != "") may = true;
           var jL = j;
-          if ($("#" + i + "_" + (--jL)).text() != "") may = true;
+          if ($("#" + i + "_" + (--jL)).text() != " " && $("#" + i + "_" + (--jL)).text() != "") may = true;
           var iB = i;
-          if ($("#" + (++iB) + "_" + j).text() != "") may = true;
+          if ($("#" + (++iB) + "_" + j).text() != " " && $("#" + (++iB) + "_" + j).text() != "") may = true;
           var iT = i;
-          if ($("#" + (--iT) + "_" + j).text() != "") may = true;
+          if ($("#" + (--iT) + "_" + j).text() != " " && $("#" + (--iT) + "_" + j).text() != "") may = true;
           var jR = j, iB = i;
-          if ($("#" + (++iB) + "_" + (++jR)).text() != "") may = true;
+          if ($("#" + (++iB) + "_" + (++jR)).text() != " " && $("#" + (++iB) + "_" + (++jR)).text() != "") may = true;
           var jL = j, iT = i;
-          if ($("#" + (--iT) + "_" + (--jL)).text() != "") may = true;
+          if ($("#" + (--iT) + "_" + (--jL)).text() != " " && $("#" + (--iT) + "_" + (--jL)).text() != "") may = true;
           var jL = j, iB = i;
-          if ($("#" + (++iB) + "_" + (--jL)).text() != "") may = true;
+          if ($("#" + (++iB) + "_" + (--jL)).text() != " " && $("#" + (++iB) + "_" + (--jL)).text() != "") may = true;
           var jR = j, iT = i;
-          if ($("#" + (--iT) + "_" + (++jR)).text() != "") may = true;
+          if ($("#" + (--iT) + "_" + (++jR)).text() != " " && $("#" + (--iT) + "_" + (++jR)).text() != "") may = true;
           if (may) {
             var spotTaken = $("#" + whatGame + " #" + slot).text();
-            if (spotTaken == "") {
+            if (spotTaken == " ") {
               k++;
               var whatCol = colFishki[idPlayer];
-              $("#" + slot).text(fishki[idPlayer]).css({ "color": whatCol });
+              $("#" + whatGame + " #" + slot).text(fishki[idPlayer]).css({ "color": whatCol });
               proverka(whatGame, fishki[idPlayer], field);
               if (gameOn == false) {
                 var a = turnPlayer.shift();
@@ -1174,7 +1152,7 @@ function PvP() {
         //Получение id клетки
         var spotTaken = $("#" + whatGame + " #" + slot).text();
         //Проверка что клетка не занята
-        if (spotTaken === "") {
+        if (spotTaken === " ") {
           k++;
           var whatCol = colFishki[idPlayer];
           $("#" + whatGame + " #" + slot).text(fishki[idPlayer]).css({ "color": whatCol });
@@ -1252,7 +1230,7 @@ function PvP() {
   socket.on('reset', () => {
     gameOn = false;
     k = 0;
-    $(".tic").html("").css("color", "white");
+    $(".tic").html(" ").css("color", "white");
     $("#game1 #input").css({ "color": "white", "display": "none" }).html("");
     $(".hrWin").remove();
     $("#reset").hide();
@@ -1272,7 +1250,7 @@ function createMaps() {
     var tr = document.createElement("tr");
     for (var j = 0; j < field; j++) {
       var td = document.createElement("td");
-      td.innerHTML = "";
+      td.innerHTML = " ";
       $(td).attr("id", i + "_" + j);
       $(td).attr("class", "tic");
       if (i == 0) {
