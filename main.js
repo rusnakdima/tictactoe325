@@ -1117,21 +1117,29 @@ function PvP() {
           i = +i;
           j = +j;
           var jR = j;
-          if ($("#" + i + "_" + (++jR)).text() != " " && $("#" + i + "_" + (++jR)).text() != "") may = true;
+          ++jR;
+          if ($("#" + i + "_" + jR).text() != " " && $("#" + i + "_" + jR).text() != "") may = true;
           var jL = j;
-          if ($("#" + i + "_" + (--jL)).text() != " " && $("#" + i + "_" + (--jL)).text() != "") may = true;
+          --jL;
+          if ($("#" + i + "_" + jL).text() != " " && $("#" + i + "_" + jL).text() != "") may = true;
           var iB = i;
-          if ($("#" + (++iB) + "_" + j).text() != " " && $("#" + (++iB) + "_" + j).text() != "") may = true;
+          ++iB;
+          if ($("#" + iB + "_" + j).text() != " " && $("#" + iB + "_" + j).text() != "") may = true;
           var iT = i;
-          if ($("#" + (--iT) + "_" + j).text() != " " && $("#" + (--iT) + "_" + j).text() != "") may = true;
+          --iT;
+          if ($("#" + iT + "_" + j).text() != " " && $("#" + iT + "_" + j).text() != "") may = true;
           var jR = j, iB = i;
-          if ($("#" + (++iB) + "_" + (++jR)).text() != " " && $("#" + (++iB) + "_" + (++jR)).text() != "") may = true;
+          ++iB; ++jR;
+          if ($("#" + iB + "_" + jR).text() != " " && $("#" + iB + "_" + jR).text() != "") may = true;
           var jL = j, iT = i;
-          if ($("#" + (--iT) + "_" + (--jL)).text() != " " && $("#" + (--iT) + "_" + (--jL)).text() != "") may = true;
+          --iT; --jL;
+          if ($("#" + iT + "_" + jL).text() != " " && $("#" + iT + "_" + jL).text() != "") may = true;
           var jL = j, iB = i;
-          if ($("#" + (++iB) + "_" + (--jL)).text() != " " && $("#" + (++iB) + "_" + (--jL)).text() != "") may = true;
+          ++iB; --jL;
+          if ($("#" + iB + "_" + jL).text() != " " && $("#" + iB + "_" + jL).text() != "") may = true;
           var jR = j, iT = i;
-          if ($("#" + (--iT) + "_" + (++jR)).text() != " " && $("#" + (--iT) + "_" + (++jR)).text() != "") may = true;
+          --iT; ++jR;
+          if ($("#" + iT + "_" + jR).text() != " " && $("#" + iT + "_" + jR).text() != "") may = true;
           if (may) {
             var spotTaken = $("#" + whatGame + " #" + slot).text();
             if (spotTaken == " ") {
