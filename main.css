@@ -1,3 +1,12 @@
+body, html{
+    cursor: url("./cursors/arrow.cur"), default;
+}
+a, button, span.choose>label, div.hyperLink, #tableStats tr:first-child td{
+    cursor: url("./cursors/link.cur"), pointer;
+}
+[type="text"], [type="password"]{
+    cursor: url("./cursors/beam.cur"), text;
+}
 .choose{
     margin-right: 15px;
     font-size: 1.5rem;
