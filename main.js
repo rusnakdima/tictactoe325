@@ -430,6 +430,13 @@ function exitgame() {
   return 0;
 }
 
+//Событие отлавливающее кнопку назад 
+if(window.history && window.history.pushState){
+  $(window).on("popstate",()=>{
+    exitgame();
+  });
+}
+
 //Функция установления победы
 function win(currentMove, field, whatGame, iB, jB, iE, jE) {
   gameOn = true;
@@ -1309,6 +1316,8 @@ function creategame() {
       //Запрос на создание ссылки
       socket.emit('createLink', field, player, noRoom);
       createMaps();
+      //Создание ссылки в истории
+      window.history.pushState("","",window.location.href);
       //Вызов функции для нескольких игроков
       PvP();
     }, 250);
