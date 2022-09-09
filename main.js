@@ -76,7 +76,6 @@ $("#profile").click(function () {
   $(".statistics").hide();
   $("#statistics").css({ "color": "#aaa" });
 });
-
 //При клике на вкладку "Открытые игры" она откроется
 $("#opengame").click(function () {
   $(".profile").hide();
@@ -88,7 +87,6 @@ $("#opengame").click(function () {
   $(".statistics").hide();
   $("#statistics").css({ "color": "#aaa" });
 });
-
 //При клике на вкладку "Создать игру" она откроется
 $("#creategame").click(function () {
   $(".profile").hide();
@@ -100,7 +98,6 @@ $("#creategame").click(function () {
   $(".statistics").hide();
   $("#statistics").css({ "color": "#aaa" });
 });
-
 //При клике на вкладку "Статистика" она откроется
 $("#statistics").click(function () {
   $(".profile").hide();
@@ -446,7 +443,7 @@ function exitgame() {
 //Событие отлавливающее кнопку назад 
 if(window.history && window.history.pushState){
   $(window).on("popstate",()=>{
-    if($("#game1").css("display") == "block") exitgame();
+    if($("#game1").css("display") == "block")  exitgame();
   });
 }
 
