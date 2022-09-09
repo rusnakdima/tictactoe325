@@ -132,12 +132,17 @@ var tempNick = "Guest"; //Временное имя игрока
 var winnings = 0; //Количество побед
 var draws = 0; //Количество ничьих
 var losses = 0; //Количество проигрышей
+var rank = "No rank"; //Ранг пользователя
+var RanksEN = ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Grandmaster"];
+var RanksRU = ["Железо", "Бронза", "Серебро", "Золото", "Платина", "Алмаз", "Грандмастер"];
+var lvlRank = [[20, 40, 80], [130, 180, 230], [290, 350, 410], [480, 550, 620], [700, 780, 860], [950, 1040, 1130], [1230, 1330, 1430]];
 
 //Обновление статистики каждые полсекунды 
 setInterval(() => {
   $("#winnings").html(winnings);
   $("#draws").html(draws);
   $("#losses").html(losses);
+  $("#rank").html(rank);
   $("#nickname").html(tempNick);
 }, 500);
 
@@ -237,6 +242,14 @@ socket.on('dataStats', (stats) => {
         winnings = stats[i]['winnings'];
         draws = stats[i]['draws'];
         losses = stats[i]['losses'];
+        for(var j = 0; j < lvlRank.length; j++){
+          for(var k = 0; k < lvlRank[j].length; k++){
+            if (lvlRank[j][k] <= winnings) {
+              if(localStorage['lang'] == "ru") rank = RanksRU[j]+" "+(k+1);
+              if(localStorage['lang'] == "en") rank = RanksEN[j]+" "+(k+1);
+            }
+          }
+        }
       }
       var tr = $("<tr></tr>");
       var td = $("<td class='border-2 border-slate-400 px-2 w-1/6'></td>");
