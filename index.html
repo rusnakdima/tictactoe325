@@ -25,13 +25,61 @@
 				</header>
 				<div style="text-align: center;">
 					<ion-icon style="width: 5em; height: 5em;" name="person-outline"></ion-icon><br>
-					<span><output id="nickname"></output> <span class="text-yellow-300" onclick="$('#back').show(); $('#Login').show();" style="font-size: 10pt;" data-rVal="Изменить" data-eVal="Edit"></span></span><br>
+					<span><output id="nickname"></output> <span class="text-yellow-300" onclick="$('#back').show(); $('#Login').show();" id="butSign" data-rVal="(Войти)" data-eVal="(Sign In)"></span><span class="text-yellow-300" id="Logout" data-rVal="(Выйти)" data-eVal="(Log out)"></span></span><br>
 					<span>
 						<span data-rVal="Количество побед: " data-eVal="Winnings: "></span><output id="winnings"></output><br>
 						<span data-rVal="Количество ничьих: " data-eVal="Draw: "></span><output id="draws"></output><br>
 						<span data-rVal="Количество проигрышей: " data-eVal="Losses: "></span><output id="losses"></output><br>
-						<span data-rVal="Ранг: " data-eVal="Rank: "></span><span id="rank"></span>
+						<span data-rVal="Ранг: " data-eVal="Rank: "></span><span id="rank" class="text-yellow-300" onclick="$('#backRank').show();" data-rVal="Нет ранга" data-eVal="No rank"></span>
 					</span>
+				</div>
+			</div>
+			<div id="backRank" class="bg-white/30 w-full h-full z-50 left-0 top-0 absolute">
+				<div class="border-2 border-yellow-300 w-max my-2.5 mx-auto p-2.5 z-50 bg-slate-900">
+					<h3 data-rVal="Таблица рангов" data-eVal="Rank table" class="text-center"></h3>
+					<table class="tableRank text-center">
+						<tr>
+							<td></td>
+							<td data-rVal="Железо" data-eVal="Iron"></td>
+							<td data-rVal="Бронза" data-eVal="Bronze"></td>
+							<td data-rVal="Серебро" data-eVal="Silver"></td>
+							<td data-rVal="Золото" data-eVal="Gold"></td>
+							<td data-rVal="Платина" data-eVal="Platinum"></td>
+							<td data-rVal="Алмаз" data-eVal="Diamond"></td>
+							<td data-rVal="Грандмастер" data-eVal="Grandmaster"></td>
+						</tr>
+						<tr>
+							<td>1</td>
+							<td>20</td>
+							<td>130</td>
+							<td>290</td>
+							<td>480</td>
+							<td>700</td>
+							<td>950</td>
+							<td>1230</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>40</td>
+							<td>180</td>
+							<td>350</td>
+							<td>550</td>
+							<td>780</td>
+							<td>1040</td>
+							<td>1330</td>
+						</tr>
+						<tr>
+							<td>3</td>
+							<td>80</td>
+							<td>230</td>
+							<td>410</td>
+							<td>620</td>
+							<td>860</td>
+							<td>1130</td>
+							<td>1430</td>
+						</tr>
+					</table>
+					<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" onclick='$("#backRank").hide();' data-rVal="Закрыть" data-eVal="Close"></button>
 				</div>
 			</div>
 			<div id="back" class="bg-white/30 w-full h-full z-50 left-0 top-0 absolute">

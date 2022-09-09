@@ -7,7 +7,7 @@ $(".creategame").hide();
 $("#creategame").css({ "color": "#aaa" });
 $(".statistics").hide();
 $("#statistics").css({ "color": "#aaa" });
-$("#back, #Login, #ReqPass, #SetPass, #game1, .Wait, #chat").hide();
+$("#back, #Login, #ReqPass, #SetPass, #game1, .Wait, #chat, #backRank, #Logout").hide();
 $("#addBot").show();
 var playRadAll = $("input[name=player]");
 for (var i = 0; i < playRadAll.length; i++) {
@@ -129,7 +129,7 @@ var tempNick = "Guest"; //Временное имя игрока
 var winnings = 0; //Количество побед
 var draws = 0; //Количество ничьих
 var losses = 0; //Количество проигрышей
-var rank = "No rank"; //Ранг пользователя
+var rank = ""; //Ранг пользователя
 var RanksEN = ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Grandmaster"];
 var RanksRU = ["Железо", "Бронза", "Серебро", "Золото", "Платина", "Алмаз", "Грандмастер"];
 var lvlRank = [[20, 40, 80], [130, 180, 230], [290, 350, 410], [480, 550, 620], [700, 780, 860], [950, 1040, 1130], [1230, 1330, 1430]];
@@ -139,7 +139,7 @@ setInterval(() => {
   $("#winnings").html(winnings);
   $("#draws").html(draws);
   $("#losses").html(losses);
-  $("#rank").html(rank);
+  if(rank != "") $("#rank").html(rank);
   $("#nickname").html(tempNick);
 }, 500);
 
@@ -161,11 +161,18 @@ if(document.cookie.indexOf("token") != -1 && document.cookie.match(/token=(.+?)(
 
 socket.on('setNickToken', (nick) => {
   tempNick = nick;
+  $("#butSign").hide();
+  $("#Logout").show();
   socket.emit('getStats');
 });
 
 socket.on('delToken', () => {
   document.cookie = "token=null";
+});
+
+$("#Logout").click(()=>{
+  document.cookie = "token=null";
+  window.location.reload();
 });
 
 //При клике на одну из радиокнопок в переменную будет занесено значение

@@ -50,6 +50,12 @@ a, button, span.choose>label, div.hyperLink, #tableStats tr:first-child td{
 hr{
     border: 1px solid white;
 }
+.tableRank td{
+    padding: 5px 15px;
+    height: 65px;
+    border: 2px solid #aaa;
+    text-align: center;
+}
 .field td{
     float: left;
     margin-left: -4px;
