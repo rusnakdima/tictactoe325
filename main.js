@@ -446,7 +446,7 @@ function exitgame() {
 //Событие отлавливающее кнопку назад 
 if(window.history && window.history.pushState){
   $(window).on("popstate",()=>{
-    if($("#game1").css("display") == "block") exitgame();
+    exitgame();
   });
 }
 
