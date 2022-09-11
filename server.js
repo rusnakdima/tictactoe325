@@ -45,28 +45,28 @@ function makeid() {
 
 io.on('connection', function (socket) {
   //Сообщение о входе в систему
-  socket.on('Login', (login) => {
+  socket.on('Login', (login, pass) => {
     User.findOne({ user: login })
       .then(users => {
-        if(users != null) socket.emit('ReqPass', login);
-        else socket.emit('SetPass', login);
+        if(users != null) {
+          if (users['pass'] == pass) socket.emit('doneLogin', (users['token']));
+          else socket.emit('invalidLog');
+        }
+        else socket.emit('notFoundNick');
       });
   });
 
-  //Сообщение о проверке пароля
-  socket.on('checkPass', (login, pass) => {
+  //Сообщение о регистрации в системе
+  socket.on('Register', (login, pass) => {
     User.findOne({ user: login })
       .then(users => {
-        if (users['pass'] == pass) socket.emit('doneLogin', (users['token']));
-        else socket.emit('invalidPass');
+        if(users == null) {
+          var token = makeid();
+          User.create({user: login, pass: pass, token: token});
+          socket.emit('doneLogin', token);
+        }
+        else socket.emit('nickExists');
       });
-  });
-
-  //Сообщение об установке пароля
-  socket.on('settingPass', (login, pass) => {
-    var token = makeid();
-    User.create({user: login, pass: pass, token: token});
-    socket.emit('doneLogin', token);
   });
 
   //Получение никнэйма через токен

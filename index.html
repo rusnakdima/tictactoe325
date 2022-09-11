@@ -25,7 +25,7 @@
 				</header>
 				<div style="text-align: center;">
 					<ion-icon style="width: 5em; height: 5em;" name="person-outline"></ion-icon><br>
-					<span><output id="nickname"></output> <span class="text-yellow-300" onclick="$('#back').show(); $('#Login').show();" id="butSign" data-rVal="(Войти)" data-eVal="(Sign In)"></span><span class="text-yellow-300" id="Logout" data-rVal="(Выйти)" data-eVal="(Log out)"></span></span><br>
+					<span><output id="nickname"></output> <span class="text-yellow-300" onclick="$('#back').show(); $('#LogWindow').show();" id="butSign" data-rVal="(Войти)" data-eVal="(Sign In)"></span><span class="text-yellow-300" id="Logout" data-rVal="(Выйти)" data-eVal="(Log out)"></span></span><br>
 					<span>
 						<span data-rVal="Количество побед: " data-eVal="Winnings: "></span><output id="winnings"></output><br>
 						<span data-rVal="Количество ничьих: " data-eVal="Draw: "></span><output id="draws"></output><br>
@@ -83,30 +83,30 @@
 				</div>
 			</div>
 			<div id="back" class="bg-white/30 w-full h-full z-50 left-0 top-0 absolute">
-				<div id="Login" class="border-2 border-yellow-300 w-max my-2.5 mx-auto p-2.5 z-50 bg-slate-900" style="top: 50px;">
+				<div id="LogWindow" class="border-2 border-yellow-300 w-max my-2.5 mx-auto p-2.5 z-50 bg-slate-900" style="top: 50px;">
+					<h3 data-rVal="Авторизация" data-eVal="Autorization" class="text-center"></h3>
 					<span data-rVal="Введите логин" data-eVal="Enter your username"></span><br>
-					<input type="text" style="background-color: #0000; color: white; border: 2px solid yellow;" id="newProfile"><br>
-					<div id="result"></div><br>
-					<div style="width: max-content; height: 40px;">
-						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" id="login" data-rVal="Войти" data-eVal="Login"></button>
-						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" onclick='$("#back").hide(); $("#back #result").css({"display": "none"});' data-rVal="Отмена" data-eVal="Cancel"></button>
-					</div>
-				</div>
-				<div id="ReqPass" class="border-2 border-yellow-300 w-max my-2.5 mx-auto p-2.5 z-50 bg-slate-900" style="top: 50px;">
+					<input type="text" style="background-color: #0000; color: white; border: 2px solid yellow;" id="inputLogin"><br>
+					<span id="result"></span><br>
 					<span data-rVal="Введите пароль" data-eVal="Enter the password"></span><br>
-					<input type="password" style="background-color: #0000; color: white; border: 2px solid yellow;" id="reqPass"><br>
-					<div id="result1"></div><br>
+					<input type="password" style="background-color: #0000; color: white; border: 2px solid yellow;" id="inputPass"><br>
+					<span data-rVal="Еще не зарегистрировались?" data-eVal="Haven't registered yet?"></span> <span class="text-yellow-300" data-rVal="Зарегистрироваться" data-eVal="Register" onclick="$('#RegWindow').show(); $('#LogWindow').hide();"></span><br>
 					<div style="width: max-content; height: 40px;">
-						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" id="sentPass" data-rVal="Войти" data-eVal="Login"></button>
-						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" onclick='$("#ReqPass").hide(); $("#Login").show(); $("#back #result").css({"display": "none"});' data-rVal="Назад" data-eVal="Back"></button>
+						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" id="butLogin" data-rVal="Войти" data-eVal="Login"></button>
+						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" onclick='$("#back, #LogWindow").hide(); $("#back #result").css({"display": "none"});' data-rVal="Отмена" data-eVal="Cancel"></button>
 					</div>
 				</div>
-				<div id="SetPass" class="border-2 border-yellow-300 w-max my-2.5 mx-auto p-2.5 z-50 bg-slate-900" style="top: 50px;">
-					<span data-rVal="Установите пароль" data-eVal="Set a password"></span><br>
-					<input type="password" style="background-color: #0000; color: white; border: 2px solid yellow;" id="setPass"><br>
+				<div id="RegWindow" class="border-2 border-yellow-300 w-max my-2.5 mx-auto p-2.5 z-50 bg-slate-900" style="top: 50px;">
+					<h3 data-rVal="Регистрация" data-eVal="Register" class="text-center"></h3>
+					<span data-rVal="Введите логин" data-eVal="Enter your username"></span><br>
+					<input type="text" style="background-color: #0000; color: white; border: 2px solid yellow;" id="inputLogin1"><br>
+					<div id="result1"></div><br>
+					<span data-rVal="Введите пароль" data-eVal="Enter the password"></span><br>
+					<input type="password" style="background-color: #0000; color: white; border: 2px solid yellow;" id="inputPass1"><br>
+					<span data-rVal="Зарегистрировались?" data-eVal="Have you registered?"></span> <span class="text-yellow-300" data-rVal="Войти в аккаунт" data-eVal="Log in to your account" onclick="$('#LogWindow').show(); $('#RegWindow').hide();"></span><br>
 					<div style="width: max-content; height: 40px;">
-						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" id="sentPass1" data-rVal="Зарегистрироваться" data-eVal="Register"></button>
-						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" onclick='$("#SetPass").hide(); $("#Login").show(); $("#back #result").css({"display": "none"});' data-rVal="Назад" data-eVal="Back"></button>
+						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" id="butReg" data-rVal="Зарегистрироваться" data-eVal="Register"></button>
+						<button class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-base px-5 py-2.5 mr-2 mb-2" onclick='$("#back, #RegWindow").hide(); $("#back #result1").css({"display": "none"});' data-rVal="Отмена" data-eVal="Cancel"></button>
 					</div>
 				</div>
 			</div>

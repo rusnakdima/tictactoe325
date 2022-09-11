@@ -7,7 +7,7 @@ $(".creategame").hide();
 $("#creategame").css({ "color": "#aaa" });
 $(".statistics").hide();
 $("#statistics").css({ "color": "#aaa" });
-$("#back, #Login, #ReqPass, #SetPass, #game1, .Wait, #chat, #backRank, #Logout").hide();
+$("#back, #LogWindow, #RegWindow, #game1, .Wait, #chat, #backRank, #Logout").hide();
 $("#addBot").show();
 var playRadAll = $("input[name=player]");
 for (var i = 0; i < playRadAll.length; i++) {
@@ -290,43 +290,65 @@ $("#statistics").click(function () {
 });
 
 //Авторизация в игре
-$("#login").click(() => {
-  if ($("#newProfile").val().length <= 10) {
-    if ($("#newProfile").val() != '') socket.emit('Login', $("#newProfile").val());
+$("#butLogin").click(() => {
+  if ($("#inputLogin").val() != '') {
+    if($("#inputPass").val().length != ''){
+      socket.emit('Login', $("#inputLogin").val(), $("#inputPass").val());
+    } else {
+      $("#back #result").attr("data-rVal", "Введите пароль").css({ "color": "yellow" });
+      $("#back #result").attr("data-eVal", "Enter the password").css({ "color": "yellow" });
+      setLang();
+    }
   } else {
-    $("#back #result").attr("data-rVal", "Вы ввели длинное имя. Максимальная длина 10 символов.").css({ "color": "yellow" });
-    $("#back #result").attr("data-eVal", "You have entered a long name. The maximum length is 10 characters.").css({ "color": "yellow" });
+    $("#back #result").attr("data-rVal", "Введите никнейм").css({ "color": "yellow" });
+    $("#back #result").attr("data-eVal", "Enter a nickname").css({ "color": "yellow" });
     setLang();
   }
 });
-//Запрос пароля
-socket.on('ReqPass', (login) => {
-  $("#ReqPass").show();
-  $("#Login").hide();
-  $("#sentPass").click(function () {
-    var pass = $("#reqPass").val();
-    if (pass != '') socket.emit('checkPass', login, pass);
-  });
+//Регистрация в игре
+$("#butReg").click(() => {
+  if ($("#inputLogin1").val().length <= 10) {
+    if ($("#inputLogin1").val() != '') {
+      if($("#inputPass1").val().length >= 6){
+        socket.emit('Register', $("#inputLogin1").val(), $("#inputPass1").val());
+      } else {
+        $("#back #result1").attr("data-rVal", "Короткий пароль").css({ "color": "yellow" });
+        $("#back #result1").attr("data-eVal", "Short password").css({ "color": "yellow" });
+        setLang();
+      }
+    } else {
+      $("#back #result1").attr("data-rVal", "Введите никнейм").css({ "color": "yellow" });
+      $("#back #result1").attr("data-eVal", "Enter a nickname").css({ "color": "yellow" });
+      setLang();
+    }
+  } else {
+    $("#back #result1").attr("data-rVal", "Вы ввели длинное имя. Максимальная длина 10 символов.").css({ "color": "yellow" });
+    $("#back #result1").attr("data-eVal", "You have entered a long name. The maximum length is 10 characters.").css({ "color": "yellow" });
+    setLang();
+  }
 });
-//Установка пароля
-socket.on('SetPass', (login) => {
-  $("#SetPass").show();
-  $("#Login").hide();
-  $("#sentPass1").click(function () {
-    var pass = $("#setPass").val();
-    if (pass != '') socket.emit('settingPass', login, pass);
-  });
+//Никнейм не найден
+socket.on('notFoundNick', ()=>{
+  $("#back #result").attr("data-rVal", "Пользователя с таким логином не существует!").css({ "color": "yellow" });
+  $("#back #result").attr("data-eVal", "There is no user with this username!").css({ "color": "yellow" });
+  setLang();
+});
+//Никнейм существует
+socket.on('nickExists',  ()=>{
+  $("#back #result1").attr("data-rVal", "Пользователь с таким логином уже существует!").css({ "color": "yellow" });
+  $("#back #result1").attr("data-eVal", "A user with this username already exists!").css({ "color": "yellow" });
+  setLang();
 });
 //Неуспешная авторизация
-socket.on('invalidPass', () => {
-  $("#back #result1").attr("data-rVal", "Неверный пароль").css({ "color": "yellow" });
-  $("#back #result1").attr("data-eVal", "Invalid password").css({ "color": "yellow" });
+socket.on('invalidLog', () => {
+  $("#back #result, #back #result1").attr("data-rVal", "Неверный логин/пароль").css({ "color": "yellow" });
+  $("#back #result, #back #result1").attr("data-eVal", "Invalid nickname/password").css({ "color": "yellow" });
   setLang();
 });
 //Успешная авторизация
 socket.on('doneLogin', (token) => {
   document.cookie = "token=" + token;
-  $("#back, #Login, #ReqPass, #SetPass").hide();
+  $("#back, #LogWindow, #RegWindow").hide();
   socket.emit('getNickToken', document.cookie.match(/token=(.+?)(;|$)/)[1]);
 });
 
