@@ -132,7 +132,20 @@ var losses = 0; //Количество проигрышей
 var rank = ""; //Ранг пользователя
 var RanksEN = ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Grandmaster"];
 var RanksRU = ["Железо", "Бронза", "Серебро", "Золото", "Платина", "Алмаз", "Грандмастер"];
-var lvlRank = [[20, 40, 80], [130, 180, 230], [290, 350, 410], [480, 550, 620], [700, 780, 860], [950, 1040, 1130], [1230, 1330, 1430]];
+var lvlRank = [[7, 17, 24, 31, 38], [46, 54, 62, 70, 78], [87, 96, 105, 114, 123], [133, 143, 153, 163, 173], [184, 195, 206, 217, 228], [240, 252, 264, 276, 288], [301, 314, 327, 340, 353]];
+
+var tableRank = $(".tableRank");
+for(var i = -1; i < lvlRank[0].length; i++) {
+  var tr = $("<tr></tr>");
+  for(var j = -1; j < lvlRank.length; j++) {
+    if(i == -1 && j == -1) tr.append("<td></td>");
+    else if(i == -1) tr.append("<td data-rVal='"+RanksRU[j]+"' data-eVal='"+RanksEN[j]+"'></td>");
+    else if(j == -1) tr.append("<td>"+(i+1)+"</td>");
+    else tr.append("<td>"+lvlRank[j][i]+"</td>");
+    tableRank.append(tr); 
+  }
+  setLang();
+}
 
 //Обновление статистики каждые полсекунды 
 setInterval(() => {
