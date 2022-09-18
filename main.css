@@ -20,6 +20,7 @@ a, button, span.choose>label, div.hyperLink, #tableStats tr:first-child td{
     display: inline-flex;
     align-items: center;
     user-select: none;
+    -webkit-user-select: none;
 }
 .choose input+label::before{
     content: '';
