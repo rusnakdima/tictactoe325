@@ -117,7 +117,7 @@ var num_player1; //Количество игроков, находящиеся �
 var gameOn = false; //Состояние игры (закончена или нет)
 var k = 0; //Счетчик установленных фишек на поле
 var noRoom; //Номер комнаты, в которой находится текущий пользователь
-var nickname; //Никнэйм данного пользователя
+var gameNick; //Никнэйм данного пользователя
 var turnPlayer = []; //Массив для хранения очередности хода игроков
 var Players = {}; //Объект для хранения никнэймов игроков в комнате
 var socket = io(); //Переменная для создания связи с сервером
@@ -125,7 +125,7 @@ var botYes = false; //Проверка на участия игры с бото�
 var fishki = ["X", "O", "∆", "□", "◊", "♫", "♡", "♤"]; //Фигурки игроков
 var colFishki = ["#0af", "#0f5", "#f00", "#ff0", "#f0f", "#ffa500", "#FF9999", "#CCFF00"];
 var numMess = 0; //Количество непрочтенных сообщений
-var tempNick = "Guest"; //Временное имя игрока
+var nickSystem = "Guest"; //Временное имя игрока
 var winnings = 0; //Количество побед
 var draws = 0; //Количество ничьих
 var losses = 0; //Количество проигрышей
@@ -153,7 +153,7 @@ setInterval(() => {
   $("#draws").html(draws);
   $("#losses").html(losses);
   if(rank != "") $("#rank").html(rank);
-  $("#nickname").html(tempNick);
+  $("#nickname").html(nickSystem);
 }, 500);
 
 var playerBlock = $(".player");
@@ -173,7 +173,7 @@ if(document.cookie.indexOf("token") != -1 && document.cookie.match(/token=(.+?)(
 }
 
 socket.on('setNickToken', (nick) => {
-  tempNick = nick;
+  nickSystem = nick;
   $("#butSign").hide();
   $("#Logout").show();
   socket.emit('getStats');
@@ -255,7 +255,7 @@ socket.on('dataStats', (stats) => {
     var tr = $('<tr><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Никнэйм" data-eVal="Nickname" id="user"></td><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Победы" data-eVal="Winnigs" id="winnings"></td><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Ничьи" data-eVal="Draws" id="draws"></td><td class="border-2 border-slate-400 px-2 w-1/6" data-rVal="Проигрыши" data-eVal="Losses" id="losses"></td></tr>');
     $(tableStats).append(tr);
     for (var i = 0; i < Object.keys(stats).length; i++) {
-      if (tempNick == stats[i]['user']) {
+      if (nickSystem == stats[i]['user']) {
         winnings = stats[i]['winnings'];
         draws = stats[i]['draws'];
         losses = stats[i]['losses'];
@@ -462,7 +462,7 @@ function exitgame() {
   k = 0;
   gameOn = false;
   turnPlayer = [];
-  socket.emit("exitGame", noRoom, nickname);
+  socket.emit("exitGame", noRoom, gameNick);
   $("footer").show();
   if ($("#opengame").css("color") == "rgb(255, 255, 255)") {
     $(".opengame").show();
@@ -485,7 +485,7 @@ function exitgame() {
 //Событие отлавливающее кнопку назад 
 if(window.history && window.history.pushState){
   $(window).on("popstate",()=>{
-    if($("#game1").css("display") == "block")  exitgame();
+    if($("#game1").css("display") == "block") exitgame();
   });
 }
 
@@ -579,7 +579,7 @@ function win(currentMove, field, whatGame, iB, jB, iE, jE) {
     $(hr).css({ "border": "3px solid white", "position": "absolute", "left": centerLE + "px", "top": centerTB + "px", "width": widthLine + "px", "height": "0px", "margin": "0", "transform": "rotateZ(-45deg)" }).attr("class", "hrWin");
   }
   game.appendChild(hr);
-  if (tempNick != "Guest") socket.emit('SentStats', tempNick, winnings, draws, losses);
+  if (nickSystem != "Guest") socket.emit('SentStats', nickSystem, winnings, draws, losses);
   return 0;
 }
 
@@ -609,7 +609,7 @@ function Draw(field, whatGame) {
   $(".player").css({ "background-color": "#000" });
   //Отображение кнопки сброса
   $("#reset").show();
-  if (tempNick != "Guest") socket.emit('SentStats', tempNick, winnings, draws, losses);
+  if (nickSystem != "Guest") socket.emit('SentStats', nickSystem, winnings, draws, losses);
   return 0;
 }
 
@@ -1027,7 +1027,7 @@ $("#chat #sendMes").click(() => {
   if ($("#chat #inputText").val() != "") {
     var text = $("#chat #inputText").val();
     //Если в поле для сообщения не пусто, то беру от туда текст и отправляю на сервер
-    socket.emit("sendMess", text, nickname, noRoom);
+    socket.emit("sendMess", text, gameNick, noRoom);
     $("#chat #inputText").val("");
   }
 });
@@ -1038,7 +1038,7 @@ document.addEventListener("keydown", (e) => {
     if (e.keyCode == 13) {
       var text = $("#chat #inputText").val();
       //Если в поле для сообщения не пусто, то беру от туда текст и отправляю на сервер
-      socket.emit("sendMess", text, nickname, noRoom);
+      socket.emit("sendMess", text, gameNick, noRoom);
       $("#chat #inputText").val("");
     }
   }
@@ -1055,7 +1055,7 @@ socket.on("messPost", (text, nickname) => {
   var output = document.querySelector("#outChat");
   var div = document.createElement("div");
   $(div).css({ "width": "70%", "border-radius": "15px", "padding": "1px 15px", "margin": "5px" }).attr("class", "bg-slate-300");
-  if (nickname != document.cookie.match(/nickname=(.+?)(;|$)/)[1]) {
+  if (nickname != nickSystem) {
     if ($("#chat").css("display") == "none")
       $(div).attr("class", "bg-red-500");
   }
@@ -1136,10 +1136,10 @@ function PvP() {
       $("#" + whatGame + " #" + elemId + ", #" + whatGame + " #" + elemId1).show();
   }
 
-  nickname = Math.floor(Math.random() * 90 + 10) + tempNick;
+  gameNick = Math.floor(Math.random() * 90 + 10) + nickSystem;
 
   //Отправление никнейма на сервер
-  socket.emit('connectGame', nickname, noRoom);
+  socket.emit('connectGame', gameNick, noRoom);
 
   //Проверка на игру с ботом
   if (botYes) socket.emit('connectGame', '00Bot', noRoom);
@@ -1149,7 +1149,7 @@ function PvP() {
     //Получение id клетки
     var slot = $(this).attr('id');
     //Отправка запроса на сервер на установление значка в клетку
-    socket.emit('click', slot, nickname, noRoom);
+    socket.emit('click', slot, gameNick, noRoom);
   });
 
   var may = false;
@@ -1263,7 +1263,7 @@ function PvP() {
 
     if (players) {
       for (var i = 0; i < Object.keys(players).length; i++) {
-        if (players[i] == nickname) {
+        if (players[i] == gameNick) {
           for (var j = 0; j < Object.keys(players).length; j++) {
             $("#" + whatGame + " #" + $(nickBlock1[j]).attr("id")).html(players[j].slice(2) + " - " + fishki[j]);
           }
@@ -1369,7 +1369,7 @@ function creategame() {
       socket.emit('createLink', field, player, noRoom);
       createMaps();
       //Создание ссылки в истории
-      window.history.pushState("","",window.location.href);
+      // window.history.pushState("","",window.location.href);
       //Вызов функции для нескольких игроков
       PvP();
     }, 250);
